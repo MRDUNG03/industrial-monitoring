@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hệ Thống Giám Sát Động Cơ Công Nghiệp</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* CARD GLASS EFFECT */
+    .glass {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Chart Shadow */
+    .chart-box {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      border-radius: 16px;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+
+  <div class="flex h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gradient-to-b from-blue-700 to-blue-900 text-white shadow-2xl">
+      <div class="p-5 text-2xl font-extrabold border-b border-blue-400/40 flex items-center">
+        <span class="mr-3 text-3xl">⚙️</span>
+        Giám Sát Động Cơ
+      </div>
+      <nav class="mt-6">
+        <ul class="space-y-1">
+          <li><a class="block p-3 pl-6 rounded-lg hover:bg-blue-600/70 transition" href="home.html">🏠 Trang Chủ</a></li>
+          <li><a class="block p-3 pl-6 rounded-lg hover:bg-blue-600/70 transition" href="datarealtime.html">📈 Dữ Liệu Thời Gian Thực</a></li>
+          <li><a class="block p-3 pl-6 rounded-lg hover:bg-blue-600/70 transition" href="alert.html">🔍 Chuẩn Đoán Lỗi</a></li>
+          <li><a class="block p-3 pl-6 rounded-lg hover:bg-blue-600/70 transition" href="history.html">📋 Lịch Sự Sự Cố</a></li>
+          <li><a class="block p-3 pl-6 rounded-lg hover:bg-blue-600/70 transition" href="settings.html">⚙️ Cài Đặt</a></li>
+          <li><a class="block p-3 pl-6 rounded-lg hover:bg-blue-600/70 transition" href="login.html">🚪 Đăng Xuất</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+
+      <h1 class="text-5xl font-extrabold text-center mb-10 tracking-wider bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 text-transparent bg-clip-text drop-shadow-[0_0_25px_rgba(0,200,255,0.7)] animate-pulse">
+        HỆ THỐNG GIÁM SÁT ĐỘNG CƠ ĐIỆN CÔNG NGHIỆP
+      </h1>
+
+      <!-- Stats Cards -->
+      <section class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-10">
+
+        <div class="glass p-6 rounded-3xl shadow-lg text-center">
+          <h2 class="text-xl font-bold mb-2">🌀 Vibration</h2>
+          <p id="vibration" class="text-4xl font-extrabold text-purple-400">--</p>
+        </div>
+
+        <div class="glass p-6 rounded-3xl shadow-lg text-center">
+          <h2 class="text-xl font-bold mb-2">🌡️ Temperature</h2>
+          <p id="temperature" class="text-4xl font-extrabold text-orange-400">--</p>
+        </div>
+
+        <div class="glass p-6 rounded-3xl shadow-lg text-center">
+          <h2 class="text-xl font-bold mb-2">🔌 Current</h2>
+          <p id="current" class="text-4xl font-extrabold text-green-400">--</p>
+        </div>
+
+        <div class="glass p-6 rounded-3xl shadow-lg text-center">
+          <h2 class="text-xl font-bold mb-2">⚡ Voltage</h2>
+          <p id="voltage" class="text-4xl font-extrabold text-blue-400">--</p>
+        </div>
+
+        <div class="glass p-6 rounded-3xl shadow-lg text-center border border-red-400/50">
+          <h2 class="text-xl font-bold mb-2">⚠️ Alert</h2>
+          <p id="systemAlert" class="text-3xl font-extrabold text-green-400">Normal</p>
+        </div>
+
+      </section>
+
+     <!-- Charts -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+  <div class="bg-white chart-box p-6 rounded-2xl text-black">
+    <h3 class="text-lg font-bold mb-4 text-center">Voltage</h3>
+    <canvas id="voltageChart"></canvas>
+  </div>
+
+  <div class="bg-white chart-box p-6 rounded-2xl text-black">
+    <h3 class="text-lg font-bold mb-4 text-center">Temperature</h3>
+    <canvas id="tempChart"></canvas>
+  </div>
+
+  <div class="bg-white chart-box p-6 rounded-2xl text-black">
+    <h3 class="text-lg font-bold mb-4 text-center">Current</h3>
+    <canvas id="currentChart"></canvas>
+  </div>
+
+  <div class="bg-white chart-box p-6 rounded-2xl text-black">
+    <h3 class="text-lg font-bold mb-4 text-center">FFT - Vibration</h3>
+    <canvas id="vibrationChart"></canvas>
+  </div>
+
+</section>
+
+
+    </main>
+  </div>
+
+  <!-- JS -->
+  <script>
+    function makeChart(id, label, color, dataArray) {
+      return new Chart(document.getElementById(id), {
+        type: "line",
+        data: {
+          labels: ["10h", "11h", "12h", "13h", "14h", "15h"],
+          datasets: [{
+            label,
+            data: dataArray,
+            borderWidth: 3,
+            borderColor: color,
+            fill: false,
+            tension: 0.3
+          }],
+        },
+        options: { responsive: true }
+      });
+    }
+
+    makeChart("voltageChart", "Điện áp (V)", "blue", [220, 218, 222, 219, 221, 220]);
+    makeChart("tempChart", "Nhiệt độ (°C)", "red", [65, 68, 70, 72, 74, 75]);
+    makeChart("currentChart", "Dòng điện (A)", "green", [5, 6, 5.5, 5.8, 6.2, 6]);
+
+    new Chart(document.getElementById("vibrationChart"), {
+      type: "line",
+      data: {
+        labels: ["0","10","20","30","40","50","60","70","80","90","100"],
+        datasets: [
+          {
+            label: "Phổ FFT",
+            data: [5, 12, 20, 18, 35, 40, 25, 15, 10, 8, 5],
+            borderWidth: 3,
+            borderColor: "purple",
+            fill: false,
+            tension: 0.2
+          },
+          {
+            label: "Peak",
+            data: [null, null, 20, null, 35, 40, null, null, null, null, null],
+            type: "scatter",
+            pointRadius: 6,
+            pointBackgroundColor: "red",
+            showLine: false
+          }
+        ]
+      },
+      options: { responsive: true }
+    });
+  </script>
+
+</body>
+</html>
