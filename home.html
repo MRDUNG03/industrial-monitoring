@@ -313,7 +313,7 @@
     // Cập nhật trạng thái hệ thống từ bảng current_status (realtime chính xác)
     async function updateSystemStatus() {
       try {
-        const res = await fetch(`${API_URL}/GetCurrentStatus/`);
+        const res = await fetch(`${API_URL}/GetStatus/`);
         if (!res.ok) throw new Error("API lỗi");
 
         const data = await res.json();
@@ -351,4 +351,5 @@
     }
   </script>
 </body>
+
 </html>
