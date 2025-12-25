@@ -114,6 +114,46 @@ export async function getAlertHistory() {
     return [];
   }
 }
+// ==================== MỚI: QUẢN LÝ THIẾT BỊ ====================
+
+// Lấy danh sách tất cả thiết bị
+export async function getDevices() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/getDevice/`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error("Lỗi lấy danh sách thiết bị:", err);
+    return [];
+  }
+}
+
+// Thêm thiết bị mới
+export async function insertDevice(deviceData) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/insertDevice/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: deviceData.name,
+        device_id: deviceData.device_id,
+        description: deviceData.description || null
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.detail || data.message || "Lỗi không xác định");
+    }
+
+    return { success: true, message: data.message || "Thêm thiết bị thành công!", data };
+  } catch (err) {
+    console.error("Lỗi thêm thiết bị:", err);
+    return { success: false, message: err.message || "Không thể kết nối server" };
+  }
+}
 // Đăng xuất (xóa dữ liệu và chuyển về trang login)
 export function logout() {
   localStorage.clear();
