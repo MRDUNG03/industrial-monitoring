@@ -297,7 +297,7 @@
         const data = await res.json();
         if (data.length === 0) return;
 
-        const latest = data[data.length - 1]; // Bản ghi mới nhất
+        const latest = data[data.length - 1]; // Lấy bản ghi mới nhất
 
         document.getElementById("ax-value").textContent = latest.ax?.toFixed(3) || "--";
         document.getElementById("ay-value").textContent = latest.ay?.toFixed(3) || "--";
