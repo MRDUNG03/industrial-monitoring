@@ -291,40 +291,39 @@
 
   // HÀM SỬA MỚI: Xử lý trường hợp backend KHÔNG TRẢ VỀ timestamp
   function formatTimestamp(ts) {
-    if (!ts || ts === null || ts === undefined) {
-      // Nếu backend không trả timestamp → hiển thị thông báo rõ ràng
-      return "<span style='color: #ff6b6b; font-style: italic;'>Thiếu dữ liệu thời gian (lỗi server)</span>";
-    }
+  if (!ts) return "Không xác định";
 
-    let date;
+  let date;
 
-    // Trường hợp 1: Chuẩn ISO có T và +07:00
-    if (typeof ts === 'string' && ts.includes('T') && (ts.includes('+') || ts.includes('Z'))) {
-      date = new Date(ts);
-    }
-    // Trường hợp 2: Định dạng MySQL "2025-12-26 10:30:45"
-    else if (typeof ts === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(ts.trim())) {
-      const isoString = ts.trim().replace(' ', 'T') + '+07:00';
-      date = new Date(isoString);
-    }
-    // Trường hợp 3: Các kiểu khác
-    else {
-      date = new Date(ts);
-    }
-
-    if (isNaN(date.getTime())) {
-      return "Không hợp lệ";
-    }
-
-    return date.toLocaleString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
+  // Trường hợp 1: Đã là ISO có timezone (backend đã format tốt)
+  if (typeof ts === 'string' && ts.includes('T') && (ts.includes('+') || ts.includes('Z'))) {
+    date = new Date(ts);
   }
+  // Trường hợp 2: Định dạng MySQL "YYYY-MM-DD HH:MM:SS" → đây là UTC, cần cộng 7 giờ cho Việt Nam
+  else if (typeof ts === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(ts.trim())) {
+    const utcString = ts.trim().replace(' ', 'T') + 'Z';  // Gắn Z để JS hiểu là UTC
+    date = new Date(utcString);
+    // Cộng thêm 7 giờ để ra giờ Việt Nam
+    date.setHours(date.getHours() + 7);
+  }
+  // Trường hợp khác
+  else {
+    date = new Date(ts);
+  }
+
+  if (isNaN(date.getTime())) {
+    return "Không hợp lệ";
+  }
+
+  return date.toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
 
   async function loadHistory() {
     const tbody = document.getElementById('historyTableBody');
