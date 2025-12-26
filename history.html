@@ -290,45 +290,44 @@
   import { getAlertHistory, logout } from './service.js';
 
   // HÀM SỬA MỚI: Xử lý trường hợp backend KHÔNG TRẢ VỀ timestamp
-  function formatTimestamp(ts) {
+ function formatTimestamp(ts) {
   if (!ts) return "Không xác định";
 
   let date;
 
-  // Trường hợp 1: Nếu là chuỗi ISO có timezone rõ ràng (có T và + hoặc Z)
-  if (typeof ts === 'string' && ts.includes('T')) {
-    date = new Date(ts);
-  }
-  // Trường hợp 2: Định dạng MySQL "YYYY-MM-DD HH:MM:SS"
-  else if (typeof ts === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(ts.trim())) {
-    const parts = ts.trim().split(' ');
-    const datePart = parts[0];
-    const timePart = parts[1];
-
-    // Tạo Date object và giả định đây là giờ LOCAL (Việt Nam)
-    // Cách tốt nhất: dùng Date với năm tháng ngày giờ trực tiếp → JS sẽ hiểu là local time
+  // Trường hợp backend trả chuỗi "YYYY-MM-DD HH:MM:SS" (phổ biến nhất từ MySQL)
+  if (typeof ts === 'string' && ts.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
+    const [datePart, timePart] = ts.trim().split(' ');
     const [year, month, day] = datePart.split('-');
     const [hour, minute, second] = timePart.split(':');
 
+    // Tạo Date object theo giờ địa phương (local time - Việt Nam +07:00)
+    // Đây là cách chính xác nhất để tránh lệch múi giờ
     date = new Date(year, month - 1, day, hour, minute, second);
   }
-  // Trường hợp khác
+  // Trường hợp đã là ISO chuẩn (có T và +07:00 hoặc Z)
+  else if (typeof ts === 'string' && ts.includes('T')) {
+    date = new Date(ts);
+  }
+  // Các trường hợp khác
   else {
     date = new Date(ts);
   }
 
+  // Kiểm tra hợp lệ
   if (isNaN(date.getTime())) {
     return "Không hợp lệ";
   }
 
-  // Định dạng đẹp tiếng Việt, giờ local
+  // Định dạng đẹp theo giờ Việt Nam
   return date.toLocaleString('vi-VN', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit'
+    second: '2-digit',
+    hour12: false
   });
 }
 
