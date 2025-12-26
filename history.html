@@ -377,7 +377,7 @@ function formatTimestamp(ts) {
   loadHistory();
   updateLiveClock();
 
-  setInterval(loadHistory, 30000);
+  setInterval(loadHistory, 5000);
   setInterval(updateLiveClock, 1000);
 
   window.logout = logout;
