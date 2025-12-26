@@ -3,438 +3,246 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lịch Sử Hoạt Động - Giám Sát Động Cơ Điện</title>
+  <title>Lịch Sử Cảnh Báo - Giám Sát Động Cơ</title>
   
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --primary: #0d6efd;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --sidebar-bg: rgba(30, 58, 138, 0.95);
-      --sidebar-hover: rgba(59, 94, 209, 0.8);
-      --glass-bg: rgba(255, 255, 255, 0.15);
-      --glass-border: rgba(255, 255, 255, 0.2);
+      --primary: #007bff;
+      --sidebar-bg: #212529;
+      --sidebar-text: #adb5bd;
+      --sidebar-hover-bg: #343a40;
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --bg-gradient: linear-gradient(135deg, #1a2a6c, #b21f1f);
+      --danger: #ff4d4d;
+      --warning: #ffc107;
     }
 
     body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1e3a8a, #1e40af);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: white;
-      overflow-x: hidden;
+      margin: 0; padding: 0; min-height: 100vh;
+      background: var(--bg-gradient);
+      font-family: 'Poppins', sans-serif;
+      color: white; overflow-x: hidden;
+      display: flex;
     }
 
+    /* ĐỒNG HỒ */
+    #live-clock {
+      position: fixed; top: 20px; right: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px; border-radius: 10px;
+      z-index: 2000; text-align: right;
+    }
+    #clock-time { font-weight: 600; font-size: 1.1rem; color: #ffeb3b; }
+    #clock-date { font-size: 0.8rem; opacity: 0.8; }
+
+    /* SIDEBAR */
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 280px;
-      height: 100vh;
-      background: var(--sidebar-bg);
-      backdrop-filter: blur(10px);
-      border-right: 1px solid var(--glass-border);
-      padding: 1.5rem 0;
-      z-index: 1000;
-      overflow-y: auto;
+      width: 260px; background: var(--sidebar-bg);
+      padding: 2rem 0; display: flex; flex-direction: column;
+      height: 100vh; position: fixed; flex-shrink: 0;
     }
+    .sidebar .logo { text-align: center; margin-bottom: 0.5rem; }
+    .sidebar .logo i { font-size: 3rem; color: var(--primary); }
+    .sidebar .logo h3 { font-size: 1.3rem; font-weight: 700; color: white; margin-top: 10px; }
 
-    .sidebar .logo { 
-      text-align: center; 
-      padding: 1rem; 
-      margin-bottom: 2rem; 
-      border-bottom: 1px solid rgba(255,255,255,0.1); 
+    .user-greeting-sidebar {
+      text-align: center; margin: 0 1rem 2rem; padding: 0.6rem;
+      background: rgba(255, 255, 255, 0.1); border-radius: 8px;
+      font-size: 0.85rem; color: #adb5bd;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-    .sidebar .logo i { 
-      font-size: 3.5rem; 
-      color: #a5d8ff; 
-    }
-    .sidebar .logo h3 { 
-      margin: 1rem 0 0; 
-      font-weight: 700; 
-      color: white; 
-    }
+    .user-greeting-sidebar strong { color: white; }
 
     .sidebar .nav-link {
-      color: rgba(255,255,255,0.8); 
-      padding: 1rem 1.5rem; 
-      margin: 0.3rem 1rem;
-      border-radius: 12px; 
-      font-weight: 500; 
-      transition: all 0.3s ease; 
-      display: flex; 
-      align-items: center;
-    }
-    .sidebar .nav-link i { 
-      font-size: 1.3rem; 
-      margin-right: 1rem; 
-      width: 30px; 
-      text-align: center; 
-    }
-    .sidebar .nav-link:hover, 
-    .sidebar .nav-link.active { 
-      background: var(--sidebar-hover); 
-      color: white; 
-      transform: translateX(8px); 
-    }
-    .sidebar .nav-link.logout { 
-      margin-top: auto; 
-      border-top: 1px solid rgba(255,255,255,0.1); 
-      padding-top: 1.5rem; 
-    }
-
-    .main-content { 
-      margin-left: 280px; 
-      padding: 2.5rem 2rem; 
-      min-height: 100vh; 
-    }
-
-    .main-title {
-      font-size: 3.4rem;
-      font-weight: 900;
-      text-align: center;
-      margin-bottom: 3rem;
-      color: #ffffff;
-      letter-spacing: 2px;
-      text-shadow: 0 0 15px rgba(165,216,255,0.9), 0 4px 12px rgba(0,0,0,0.7);
-    }
-
-    .history-card {
-      background: rgba(255, 255, 255, 0.95);
-      color: #000;
-      border-radius: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-      overflow: hidden;
-      padding: 2.5rem;
-    }
-
-    .history-card h5 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #1e3a8a;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-
-    .history-table-container {
-      max-height: 68vh;
-      overflow-y: auto;
-      border-radius: 16px;
-      background: white;
-      box-shadow: inset 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .history-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 12px;
-      margin: 0;
-    }
-
-    .history-table th {
-      background: #0d6efd;
-      color: white;
-      padding: 1.4rem;
-      font-weight: 600;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      text-align: center;
-      font-size: 1.1rem;
-    }
-
-    .history-table td {
-      padding: 1.4rem;
-      background: #f8f9fa;
-      text-align: center;
-      font-size: 1.05rem;
-    }
-
-    .history-table tr:hover td {
-      background: #e9ecef;
+      color: var(--sidebar-text); padding: 0.9rem 1.5rem; margin: 0.2rem 1rem;
+      border-radius: 8px; display: flex; align-items: center; text-decoration: none;
       transition: 0.3s;
     }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+      background: var(--sidebar-hover-bg); color: white; transform: translateX(5px);
+    }
+    .sidebar .nav-link i { width: 25px; margin-right: 12px; font-size: 1.1rem; }
+    .logout { margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; }
 
-    .error-type {
-      font-weight: bold;
-      color: var(--danger);
+    /* NỘI DUNG CHÍNH */
+    .main-content { margin-left: 260px; padding: 3rem; width: 100%; }
+    .main-title {
+      font-size: 2.8rem; font-weight: 700; text-align: center; margin-bottom: 3rem;
+      text-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
 
-    .alert-message {
-      color: #333;
+    /* CARD LỊCH SỬ */
+    .history-container {
+      background: var(--glass-bg); backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border); border-radius: 24px;
+      padding: 2rem; box-shadow: 0 12px 40px rgba(0,0,0,0.4);
     }
 
-    .no-data {
-      text-align: center;
-      padding: 4rem 2rem;
-      color: #666;
-      font-style: italic;
-      font-size: 1.2rem;
+    .table-wrapper {
+      max-height: 60vh; overflow-y: auto; border-radius: 12px;
     }
 
-    .footer-info {
-      text-align: center;
-      margin-top: 2rem;
-      color: rgba(255,255,255,0.8);
-      font-size: 0.95rem;
+    .history-table { color: white; margin-bottom: 0; width: 100%; border-collapse: collapse; }
+    .history-table thead th {
+      background: rgba(255, 255, 255, 0.15);
+      position: sticky; top: 0; z-index: 5;
+      color: #a5d8ff; padding: 1.2rem; border: none;
+      font-weight: 600; text-transform: uppercase; font-size: 0.85rem;
     }
-
-    /* ĐỒNG HỒ THỜI GIAN THỰC */
-    #live-clock {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 16px;
-      padding: 12px 20px;
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: white;
-      z-index: 2000;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 260px;
-      justify-content: center;
+    
+    /* CHỮ MÀU TRẮNG CHO THỜI GIAN VÀ CHI TIẾT */
+    .history-table tbody td {
+      padding: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+      vertical-align: middle; background: rgba(0,0,0,0.1);
+      color: #ffffff !important; /* Cưỡng ép chữ màu trắng */
     }
+    
+    .history-table tbody tr:hover td { background: rgba(255,255,255,0.08); }
 
-    #live-clock i {
-      font-size: 1.8rem;
-      color: #ffd43b;
+    .error-badge {
+      padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem;
+      text-transform: uppercase; display: inline-block;
     }
+    .badge-danger { background: rgba(255, 77, 77, 0.2); color: #ff4d4d !important; border: 1px solid #ff4d4d; }
+    .badge-warning { background: rgba(255, 193, 7, 0.2); color: #ffc107 !important; border: 1px solid #ffc107; }
 
-    .clock-date {
-      font-size: 1.1rem;
-      opacity: 0.9;
-      margin-top: 4px;
+    .footer-status {
+      margin-top: 1.5rem; text-align: center; font-size: 0.85rem; opacity: 0.6;
     }
 
     @media (max-width: 992px) {
       .sidebar { width: 80px; }
-      .sidebar .logo h3, .sidebar .nav-link span { display: none; }
-      .sidebar .nav-link { justify-content: center; padding: 1.2rem; }
-      .main-content { margin-left: 80px; padding: 2rem 1.5rem; }
-      .main-title { font-size: 2.6rem; }
-      .history-card { padding: 2rem; }
-      .history-card h5 { font-size: 1.5rem; }
-      .history-table-container { max-height: 60vh; }
-      #live-clock { top: 10px; right: 10px; padding: 10px 16px; font-size: 1.2rem; min-width: 220px; }
-      #live-clock i { font-size: 1.5rem; }
-    }
-
-    @media (max-width: 576px) {
-      .main-title { font-size: 2.2rem; margin-bottom: 2rem; }
-      .history-card { padding: 1.5rem; }
-      #live-clock { font-size: 1.1rem; padding: 8px 14px; min-width: auto; }
+      .sidebar .logo h3, .sidebar .nav-link span, .user-greeting-sidebar { display: none; }
+      .main-content { margin-left: 80px; padding: 1.5rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ĐỒNG HỒ THỜI GIAN THỰC -->
   <div id="live-clock">
-    <i class="fas fa-clock"></i>
-    <div>
-      <div id="clock-time">--:--:--</div>
-      <div class="clock-date" id="clock-date">Đang tải...</div>
-    </div>
+    <div id="clock-time">--:--:--</div>
+    <div id="clock-date">Đang tải...</div>
   </div>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="logo">
-      <i class="fas fa-microchip"></i>
-      <h3>GIÁM SÁT ĐỘNG CƠ ĐIỆN</h3>
+      <i class="fas fa-industry"></i>
+      <h3>GIÁM SÁT ĐỘNG CƠ</h3>
     </div>
-    <nav class="nav flex-column px-3">
-       <a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Trang chủ</span></a>
-      <a href="chart.html" class="nav-link active"><i class="fas fa-chart-line"></i><span>Biểu đồ trực quan</span></a>
-      <a href="history.html" class="nav-link"><i class="fas fa-history"></i><span>Lịch sử lỗi</span></a>
+    
+    <div class="user-greeting-sidebar">
+      <i class="fas fa-user-circle"></i>
+      <span id="username-display">Đang tải...</span>
+    </div>
+
+    <nav class="nav flex-column">
+      <a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+      <a href="chart.html" class="nav-link"><i class="fas fa-chart-line"></i><span>Biểu đồ trực quan</span></a>
+      <a href="history.html" class="nav-link active"><i class="fas fa-history"></i><span>Lịch sử lỗi</span></a>
       <a href="device.html" class="nav-link"><i class="fas fa-tools"></i><span>Quản lý thiết bị</span></a>
-      <a href="index.html" class="nav-link logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a>
+      <a href="#" class="nav-link logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a>
     </nav>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
-    <div class="container-fluid">
-      <h2 class="main-title">LỊCH SỬ HOẠT ĐỘNG & CẢNH BÁO</h2>
+    <h1 class="main-title">NHẬT KÝ CẢNH BÁO</h1>
 
-      <div class="row justify-content-center">
-        <div class="col-12 col-xl-11">
-          <div class="history-card">
-            <h5>
-              <i class="fas fa-exclamation-triangle text-danger me-2"></i>
-              Danh sách các lần phát hiện bất thường
-            </h5>
+    <div class="history-container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0"><i class="fas fa-clipboard-list me-2 text-warning"></i>Danh sách phát hiện bất thường</h4>
+        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadHistory()">
+          <i class="fas fa-sync-alt me-1"></i> Làm mới
+        </button>
+      </div>
 
-            <div class="history-table-container">
-              <table class="history-table">
-                <thead>
-                  <tr>
-                    <th width="28%">Thời gian</th>
-                    <th width="20%">Loại lỗi</th>
-                    <th width="52%">Thông báo chi tiết</th>
-                  </tr>
-                </thead>
-                <tbody id="historyTableBody">
-                  <tr>
-                    <td colspan="3" class="no-data">
-                      <i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>
-                      Đang tải lịch sử cảnh báo...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+      <div class="table-wrapper">
+        <table class="table history-table">
+          <thead>
+            <tr>
+              <th width="25%">Thời gian</th>
+              <th width="20%">Loại cảnh báo</th>
+              <th width="55%">Nội dung chi tiết</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="3" class="text-center py-5">
+                <div class="spinner-border text-light opacity-50" role="status"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-            <div class="footer-info">
-              <i class="fas fa-sync-alt fa-spin me-1"></i>
-              Tự động cập nhật mỗi 15 giây • Dữ liệu từ server cloud
-            </div>
-          </div>
-        </div>
+      <div class="footer-status">
+        <i class="fas fa-shield-alt me-1"></i> Hệ thống tự động ghi lại mọi biến động bất thường từ cảm biến.
       </div>
     </div>
   </div>
 
-  <!-- Script -->
   <script type="module">
     import { getAlertHistory, logout } from './service.js';
 
-    // HÀM FORMAT THỜI GIAN - GIỜ VIỆT NAM
     function formatTimestamp(ts) {
-      if (!ts) return "Không xác định";
-
-      try {
-        const date = new Date(ts);
-        
-        if (isNaN(date.getTime())) {
-          console.error('Invalid timestamp:', ts);
-          return "Thời gian không hợp lệ";
-        }
-
-        // Sử dụng timezone Việt Nam để format
-        const options = {
-          timeZone: 'Asia/Ho_Chi_Minh',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour12: false
-        };
-        
-        const formatter = new Intl.DateTimeFormat('vi-VN', options);
-        const parts = formatter.formatToParts(date);
-        
-        // Lấy từng phần
-        const getValue = (type) => parts.find(p => p.type === type)?.value || '00';
-        
-        const hours = getValue('hour');
-        const minutes = getValue('minute');
-        const seconds = getValue('second');
-        const day = getValue('day');
-        const month = getValue('month');
-        const year = getValue('year');
-        
-        return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
-        
-      } catch (error) {
-        console.error('Error formatting timestamp:', error);
-        return "Lỗi định dạng";
-      }
+      if (!ts) return "---";
+      const date = new Date(ts);
+      return date.toLocaleString('vi-VN', { 
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
     }
 
     async function loadHistory() {
       const tbody = document.getElementById('historyTableBody');
-      let alerts;
-
       try {
-        alerts = await getAlertHistory();
+        const alerts = await getAlertHistory();
+        tbody.innerHTML = '';
+
+        if (!alerts || alerts.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" class="text-center py-5 text-white opacity-50 italic">Không có dữ liệu cảnh báo nào được ghi nhận.</td></tr>`;
+          return;
+        }
+
+        alerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        alerts.forEach(alert => {
+          const alertType = alert.alert || 'LỖI HỆ THỐNG';
+          const isDanger = alertType.includes('QUÁ') || alertType.includes('LỖI');
+          const badgeClass = isDanger ? 'badge-danger' : 'badge-warning';
+
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td style="color: white;"><i class="far fa-clock me-2 opacity-50"></i>${formatTimestamp(alert.timestamp)}</td>
+            <td><span class="error-badge ${badgeClass}">${alertType}</span></td>
+            <td style="color: white;">${alert.message || 'Dữ liệu cảm biến vượt ngưỡng cho phép.'}</td>
+          `;
+          tbody.appendChild(row);
+        });
       } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="3" class="no-data text-danger">
-          <i class="fas fa-exclamation-circle fa-2x mb-3"></i><br>
-          Lỗi kết nối server!
-        </td></tr>`;
-        return;
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-5 text-danger">Lỗi tải dữ liệu. Vui lòng kiểm tra kết nối!</td></tr>`;
       }
-
-      tbody.innerHTML = '';
-
-      if (!alerts || alerts.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="3" class="no-data py-5">
-              <i class="fas fa-check-circle text-success fa-3x mb-4"></i><br>
-              <strong>Chưa có cảnh báo nào!</strong><br>
-              <small>Hệ thống đang hoạt động bình thường và an toàn.</small>
-            </td>
-          </tr>`;
-        return;
-      }
-
-      // Sắp xếp mới nhất lên đầu
-      alerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-      alerts.forEach(alert => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${formatTimestamp(alert.timestamp)}</td>
-          <td class="error-type">${alert.alert || 'LỖI CHUNG'}</td>
-          <td class="alert-message">${alert.message || 'Không có mô tả chi tiết'}</td>
-        `;
-        tbody.appendChild(row);
-      });
     }
 
-    // Đồng hồ thời gian thực - Giờ Việt Nam
-    function updateLiveClock() {
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('vi-VN', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit', 
-        hour12: false,
-        timeZone: 'Asia/Ho_Chi_Minh'
-      });
-      const dateStr = now.toLocaleDateString('vi-VN', { 
-        weekday: 'long', 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric',
-        timeZone: 'Asia/Ho_Chi_Minh'
-      });
-      const capitalizedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+    const user = localStorage.getItem("username") || "Guest";
+    document.getElementById("username-display").innerHTML = `Xin chào, <strong>${user}</strong>`;
 
-      document.getElementById('clock-time').textContent = timeStr;
-      document.getElementById('clock-date').textContent = capitalizedDate;
-    }
-
-    // Khởi động
     loadHistory();
-    updateLiveClock();
+    setInterval(loadHistory, 15000);
 
-    // Tự động cập nhật
-    setInterval(loadHistory, 15000); // Mỗi 15 giây
-    setInterval(updateLiveClock, 1000);
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('clock-time').textContent = now.toLocaleTimeString('vi-VN');
+      document.getElementById('clock-date').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' });
+    }, 1000);
 
-    // Export logout
     window.logout = logout;
   </script>
 
-  <!-- Bootstrap Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -3,297 +3,288 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản Lý Thiết Bị - Giám Sát Động Cơ Điện</title>
+  <title>Quản Lý Thiết Bị - Giám Sát Động Cơ</title>
   
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --primary: #0d6efd;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --sidebar-bg: rgba(30, 58, 138, 0.95);
-      --sidebar-hover: rgba(59, 94, 209, 0.8);
-      --glass-bg: rgba(255, 255, 255, 0.15);
-      --glass-border: rgba(255, 255, 255, 0.2);
+      --primary: #007bff;
+      --sidebar-bg: #212529;
+      --sidebar-text: #adb5bd;
+      --sidebar-hover-bg: #343a40;
+      --bg-gradient: linear-gradient(135deg, #1a2a6c, #b21f1f);
     }
 
     body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1e3a8a, #1e40af);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: white;
-      overflow-x: hidden;
+      margin: 0; padding: 0; min-height: 100vh;
+      background: var(--bg-gradient);
+      font-family: 'Poppins', sans-serif;
+      color: white; overflow-x: hidden;
+      display: flex;
     }
 
+    /* ĐỒNG HỒ */
+    #live-clock {
+      position: fixed; top: 20px; right: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px; border-radius: 10px;
+      z-index: 2000; text-align: right;
+    }
+    #clock-time { font-weight: 600; font-size: 1.1rem; color: #ffeb3b; }
+    #clock-date { font-size: 0.8rem; opacity: 0.8; }
+
+    /* SIDEBAR */
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 280px;
-      height: 100vh;
-      background: var(--sidebar-bg);
-      backdrop-filter: blur(10px);
-      border-right: 1px solid var(--glass-border);
-      padding: 1.5rem 0;
-      z-index: 1000;
-      overflow-y: auto;
+      width: 260px; background: var(--sidebar-bg);
+      padding: 2rem 0; display: flex; flex-direction: column;
+      height: 100vh; position: fixed; flex-shrink: 0;
     }
+    .sidebar .logo { text-align: center; margin-bottom: 0.5rem; }
+    .sidebar .logo i { font-size: 3rem; color: var(--primary); }
+    .sidebar .logo h3 { font-size: 1.3rem; font-weight: 700; color: white; margin-top: 10px; }
 
-    .sidebar .logo { text-align: center; padding: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .sidebar .logo i { font-size: 3.5rem; color: #a5d8ff; }
-    .sidebar .logo h3 { margin: 1rem 0 0; font-weight: 700; color: white; }
+    .user-greeting-sidebar {
+      text-align: center; margin: 0 1rem 2rem; padding: 0.6rem;
+      background: rgba(255, 255, 255, 0.1); border-radius: 8px;
+      font-size: 0.85rem; color: #adb5bd;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
 
     .sidebar .nav-link {
-      color: rgba(255,255,255,0.8); padding: 1rem 1.5rem; margin: 0.3rem 1rem;
-      border-radius: 12px; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center;
+      color: var(--sidebar-text); padding: 0.9rem 1.5rem; margin: 0.2rem 1rem;
+      border-radius: 8px; display: flex; align-items: center; text-decoration: none;
+      transition: 0.3s;
     }
-    .sidebar .nav-link i { font-size: 1.3rem; margin-right: 1rem; width: 30px; text-align: center; }
-    .sidebar .nav-link:hover, .sidebar .nav-link.active { background: var(--sidebar-hover); color: white; transform: translateX(8px); }
-    .sidebar .nav-link.logout { margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+      background: var(--sidebar-hover-bg); color: white; transform: translateX(5px);
+    }
+    .sidebar .nav-link i { width: 25px; margin-right: 12px; font-size: 1.1rem; }
+    .logout { margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; }
 
-    .main-content { margin-left: 280px; padding: 2.5rem 2rem; min-height: 100vh; }
-
+    /* NỘI DUNG CHÍNH */
+    .main-content { margin-left: 260px; padding: 3rem; width: 100%; }
     .main-title {
-      font-size: 3.4rem;
-      font-weight: 900;
-      text-align: center;
-      margin-bottom: 3rem;
-      color: #ffffff;
-      letter-spacing: 2px;
-      text-shadow: 0 0 15px rgba(165,216,255,0.9), 0 4px 12px rgba(0,0,0,0.7);
+      font-size: 2.8rem; font-weight: 700; text-align: center; margin-bottom: 3rem;
+      text-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
 
-    .device-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
+    /* CARD NỀN TRẮNG */
+    .white-device-card {
+      background: #ffffff;
       border-radius: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
       padding: 2.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
 
     .device-table {
-      background: rgba(255,255,255,0.97);
-      color: #000;
-      border-radius: 16px;
-      overflow: hidden;
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 12px;
     }
 
-    .device-table th {
-      background: #0d6efd;
-      color: white;
-      padding: 1.4rem;
-      font-weight: 600;
+    .device-table thead th {
+      background: #f8f9fa;
+      color: #777;
+      border: none;
+      padding: 1.2rem;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    .device-table tbody tr {
+      background: #ffffff;
+      transition: 0.3s;
+    }
+
+    .device-table tbody tr:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+      background: #f8fbff;
     }
 
     .device-table td {
-      padding: 1.3rem;
+      padding: 1.5rem;
       vertical-align: middle;
+      text-align: center;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+      color: #333;
     }
 
-    .status-online { color: var(--success); font-weight: bold; }
-    .status-offline { color: var(--danger); font-weight: bold; }
+    /* Bo góc hàng */
+    .device-table td:first-child { border-left: 1px solid #eee; border-radius: 15px 0 0 15px; }
+    .device-table td:last-child { border-right: 1px solid #eee; border-radius: 0 15px 15px 0; }
 
-    .btn-add { background: var(--success); border: none; padding: 0.8rem 1.5rem; font-size: 1.1rem; }
+    /* Trạng thái */
+    .status-pill {
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-online { background: #eefdf5; color: #10b981; border: 1px solid #10b981; }
+    .status-offline { background: #fff5f5; color: #ef4444; border: 1px solid #ef4444; }
+
+    /* Modal */
+    .modal-content { border-radius: 25px; border: none; }
+    .modal-header { background: #f8f9fa; border-bottom: 1px solid #eee; border-radius: 25px 25px 0 0; }
 
     @media (max-width: 992px) {
       .sidebar { width: 80px; }
-      .sidebar .logo h3, .sidebar .nav-link span { display: none; }
-      .sidebar .nav-link { justify-content: center; padding: 1.2rem; }
-      .main-content { margin-left: 80px; padding: 2rem 1.5rem; }
-      .main-title { font-size: 2.6rem; }
-      .device-card { padding: 2rem; }
+      .sidebar .logo h3, .sidebar .nav-link span, .user-greeting-sidebar { display: none; }
+      .main-content { margin-left: 80px; padding: 1.5rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Alert container (cho showAlert từ service.js) -->
-  <div id="alert-container" class="container-fluid position-fixed top-0 start-50 translate-middle-x mt-4" style="z-index: 1100; max-width: 600px;"></div>
+  <div id="live-clock">
+    <div id="clock-time">--:--:--</div>
+    <div id="clock-date">Đang tải...</div>
+  </div>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="logo">
-      <i class="fas fa-microchip"></i>
-      <h3>GIÁM SÁT ĐỘNG CƠ ĐIỆN</h3>
+      <i class="fas fa-industry"></i>
+      <h3>GIÁM SÁT ĐỘNG CƠ</h3>
     </div>
-    <nav class="nav flex-column px-3">
-       <a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Trang chủ</span></a>
-      <a href="chart.html" class="nav-link active"><i class="fas fa-chart-line"></i><span>Biểu đồ trực quan</span></a>
+    <div class="user-greeting-sidebar">
+      <i class="fas fa-user-circle"></i>
+      <span id="username-display">Xin chào, <strong>User</strong></span>
+    </div>
+    <nav class="nav flex-column">
+      <a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+      <a href="chart.html" class="nav-link"><i class="fas fa-chart-line"></i><span>Biểu đồ trực quan</span></a>
       <a href="history.html" class="nav-link"><i class="fas fa-history"></i><span>Lịch sử lỗi</span></a>
-      <a href="device.html" class="nav-link"><i class="fas fa-tools"></i><span>Quản lý thiết bị</span></a>
-      <a href="index.html" class="nav-link logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a>
+      <a href="device.html" class="nav-link active"><i class="fas fa-tools"></i><span>Quản lý thiết bị</span></a>
+      <a href="#" class="nav-link logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a>
     </nav>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
-    <div class="container-fluid">
-      <h2 class="main-title">QUẢN LÝ THIẾT BỊ</h2>
+    <h1 class="main-title">QUẢN LÝ THIẾT BỊ</h1>
 
-      <div class="row justify-content-center">
-        <div class="col-12 col-xl-11">
-          <div class="device-card">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h4 class="mb-0 text-white"><i class="fas fa-list me-2"></i>Danh sách thiết bị giám sát</h4>
-              <button class="btn btn-success btn-add" data-bs-toggle="modal" data-bs-target="#addDeviceModal">
-                <i class="fas fa-plus-circle me-2"></i>Thêm thiết bị mới
-              </button>
-            </div>
+    <div class="white-device-card">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 text-dark fw-bold">Danh sách thiết bị</h4>
+        <button class="btn btn-primary px-4 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#addDeviceModal">
+          <i class="fas fa-plus-circle me-2"></i>Thêm thiết bị mới
+        </button>
+      </div>
 
-            <div class="table-responsive">
-              <table class="table table-hover device-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Tên thiết bị</th>
-                    <th>Mã thiết bị</th>
-                    <th>Trạng thái</th>
-                    <th>Cập nhật cuối</th>
-                    <th>Mô tả</th>
-                  </tr>
-                </thead>
-                <tbody id="deviceTableBody">
-                  <tr>
-                    <td colspan="6" class="text-center py-5">
-                      <i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>
-                      Đang tải danh sách thiết bị...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+      <div class="table-responsive">
+        <table class="table device-table">
+          <thead>
+            <tr>
+              <th width="10%">STT</th>
+              <th width="40%">Tên thiết bị</th>
+              <th width="20%">Trạng thái</th>
+              <th width="30%">Cập nhật cuối</th>
+            </tr>
+          </thead>
+          <tbody id="deviceTableBody">
+            </tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <!-- Modal Thêm Thiết Bị -->
   <div class="modal fade" id="addDeviceModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fas fa-microchip me-2"></i>Thêm thiết bị mới</h5>
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Thêm trạm thiết bị mới</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-4">
           <form id="deviceForm">
             <div class="mb-3">
-              <label class="form-label fw-bold">Tên thiết bị <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="deviceName" placeholder="Ví dụ: Động cơ sản xuất A1" required>
+              <label class="form-label fw-bold">Tên thiết bị</label>
+              <input type="text" class="form-control" id="deviceName" placeholder="Nhập tên động cơ...">
             </div>
             <div class="mb-3">
-              <label class="form-label fw-bold">Mã thiết bị (Device ID) <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="deviceId" placeholder="Ví dụ: MOTOR-001" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Mô tả</label>
-              <textarea class="form-control" id="deviceDesc" rows="3" placeholder="Thông tin bổ sung..."></textarea>
+              <label class="form-label fw-bold">Mã Device ID (Cần thiết để kết nối)</label>
+              <input type="text" class="form-control" id="deviceId" placeholder="Ví dụ: MOTOR_01">
             </div>
           </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-          <button type="button" class="btn btn-primary" id="saveDeviceBtn">
-            <i class="fas fa-save me-2"></i>Lưu thiết bị
-          </button>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary rounded-pill px-4" id="saveDeviceBtn">Lưu trạm</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Script -->
   <script type="module">
-    import { getDevices, insertDevice, logout, showAlert } from './service.js';
+    import { getDevices, insertDevice, logout } from './service.js';
 
-    // Định dạng thời gian
-    function formatDate(dateStr) {
-      if (!dateStr) return "Chưa cập nhật";
-      return new Date(dateStr).toLocaleString('vi-VN');
-    }
-
-    // Load danh sách thiết bị
     async function loadDevices() {
       const tbody = document.getElementById('deviceTableBody');
-      const devices = await getDevices();
+      try {
+        const devices = await getDevices();
+        tbody.innerHTML = '';
 
-      tbody.innerHTML = '';
+        if (!devices || devices.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-muted">Không có thiết bị.</td></tr>`;
+          return;
+        }
 
-      if (devices.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="text-center py-5 text-muted">
-              <i class="fas fa-inbox fa-3x mb-3"></i><br>
-              <strong>Chưa có thiết bị nào</strong><br>
-              <small>Hãy nhấn "Thêm thiết bị mới" để bắt đầu</small>
+        devices.forEach((dev, index) => {
+          const isOnline = dev.status === "online";
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><strong>${index + 1}</strong></td>
+            <td class="fw-bold text-primary">${dev.name || 'N/A'}</td>
+            <td>
+              <span class="status-pill ${isOnline ? 'status-online' : 'status-offline'}">
+                <i class="fas fa-circle" style="font-size: 8px;"></i> ${isOnline ? 'ONLINE' : 'OFFLINE'}
+              </span>
             </td>
-          </tr>`;
-        return;
+            <td class="text-muted small">${dev.last_update ? new Date(dev.last_update).toLocaleString('vi-VN') : 'Chưa có dữ liệu'}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-danger">Lỗi kết nối.</td></tr>`;
       }
-
-      devices.forEach((dev, index) => {
-        const statusClass = dev.status === "online" ? "status-online" : "status-offline";
-        const statusText = dev.status === "online" ? "Online" : "Offline";
-        const statusIcon = dev.status === "online" ? "fa-circle-dot" : "fa-circle";
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${index + 1}</td>
-          <td><strong>${dev.name}</strong></td>
-          <td><code>${dev.device_id}</code></td>
-          <td><i class="fas ${statusIcon} me-2 ${statusClass}"></i>${statusText}</td>
-          <td>${formatDate(dev.last_update)}</td>
-          <td>${dev.description || '<em class="text-muted">Không có mô tả</em>'}</td>
-        `;
-        tbody.appendChild(row);
-      });
     }
 
-    // Xử lý nút lưu thiết bị
     document.getElementById('saveDeviceBtn').addEventListener('click', async () => {
       const name = document.getElementById('deviceName').value.trim();
       const deviceId = document.getElementById('deviceId').value.trim();
-      const desc = document.getElementById('deviceDesc').value.trim();
-
-      if (!name || !deviceId) {
-        showAlert("Vui lòng nhập đầy đủ Tên và Mã thiết bị!", "warning");
-        return;
-      }
-
-      const result = await insertDevice({
-        name,
-        device_id: deviceId,
-        description: desc || null
-      });
-
-      if (result.success) {
-        showAlert("Thêm thiết bị thành công!", "success");
-        // Đóng modal và reset form
-        bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
-        document.getElementById('deviceForm').reset();
-        loadDevices(); // Reload danh sách
-      } else {
-        showAlert(result.message || "Không thể thêm thiết bị. Vui lòng thử lại!", "danger");
+      if (name && deviceId) {
+        const result = await insertDevice({ name, device_id: deviceId });
+        if (result.success) {
+          bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
+          loadDevices();
+        }
       }
     });
 
-    // Load lần đầu và tự động cập nhật
+    // Khởi tạo thông tin người dùng và dữ liệu
+    document.getElementById("username-display").innerHTML = `Xin chào, <strong>${localStorage.getItem("username") || "User"}</strong>`;
     loadDevices();
-    setInterval(loadDevices, 15000); // Cập nhật mỗi 15 giây
+    setInterval(loadDevices, 15000);
 
-    // Logout
+    // Đồng hồ
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('clock-time').textContent = now.toLocaleTimeString('vi-VN');
+      document.getElementById('clock-date').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' });
+    }, 1000);
+
     window.logout = logout;
   </script>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

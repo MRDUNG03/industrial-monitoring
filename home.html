@@ -3,360 +3,357 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Giám Sát Trạng Thái Động Cơ Điện</title>
+  <title>Trang Chủ - Giám Sát Động Cơ</title>
   
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --primary: #0d6efd;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --sidebar-bg: rgba(30, 58, 138, 0.95);
-      --sidebar-hover: rgba(59, 94, 209, 0.8);
-      --glass-bg: rgba(255, 255, 255, 0.15);
-      --glass-border: rgba(255, 255, 255, 0.2);
+      --primary: #007bff; /* Xanh dương hiện đại */
+      --secondary: #6c757d;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --info: #17a2b8;
+      --dark: #343a40;
+      
+      --bg-gradient-start: #1a2a6c; /* Gradient nền đậm hơn */
+      --bg-gradient-end: #b21f1f;
+      
+      --sidebar-bg: #212529; /* Nền sidebar tối hơn, phẳng hơn */
+      --sidebar-text: #adb5bd;
+      --sidebar-hover-bg: #343a40;
+      --sidebar-active-bg: #007bff;
+      --sidebar-active-text: #ffffff;
+
+      --card-bg: rgba(255, 255, 255, 0.08); /* Nền card trong suốt nhẹ */
+      --card-border: rgba(255, 255, 255, 0.15);
+      --text-color: #f8f9fa; /* Màu chữ sáng */
+      --heading-color: #ffffff;
     }
 
     body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1e3a8a, #1e40af);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: white;
+      margin: 0; padding: 0; min-height: 100vh;
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      font-family: 'Poppins', sans-serif; /* Font chính hiện đại */
+      color: var(--text-color);
       overflow-x: hidden;
+      display: flex; /* Dùng flexbox cho bố cục chính */
     }
 
+    /* ĐỒNG HỒ GÓC TRÊN CÙNG BÊN PHẢI */
+    #live-clock {
+      position: fixed; top: 20px; right: 20px;
+      background: rgba(0, 0, 0, 0.5); /* Nền tối nhẹ */
+      padding: 10px 15px; border-radius: 10px;
+      color: #ffffff; font-size: 0.9rem; font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      z-index: 2000;
+    }
+    #live-clock i { color: #ffeb3b; /* Icon màu vàng */ }
+    #clock-time { font-weight: 600; font-size: 1.1rem; }
+    #clock-date { opacity: 0.8; }
+
+    /* SIDEBAR HIỆN ĐẠI */
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 280px;
-      height: 100vh;
-      background: var(--sidebar-bg);
-      backdrop-filter: blur(10px);
-      border-right: 1px solid var(--glass-border);
-      padding: 1.5rem 0;
-      z-index: 1000;
-      overflow-y: auto;
+      width: 260px; /* Chiều rộng cố định */
+      background-color: var(--sidebar-bg); /* Nền tối */
+      padding: 2rem 0;
+      box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+      display: flex; flex-direction: column;
+      flex-shrink: 0; /* Không co lại */
     }
-
     .sidebar .logo {
       text-align: center;
-      padding: 1rem;
       margin-bottom: 2rem;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 0 1rem;
     }
-
     .sidebar .logo i {
-      font-size: 3.5rem;
-      color: #a5d8ff;
+      font-size: 3.2rem;
+      color: var(--primary); /* Icon màu chính */
+      margin-bottom: 0.5rem;
     }
-
     .sidebar .logo h3 {
-      margin: 1rem 0 0;
+      font-family: 'Roboto', sans-serif; /* Font khác cho tiêu đề */
+      font-size: 1.5rem;
       font-weight: 700;
-      color: white;
-    }
-
-    .sidebar .nav-link {
-      color: rgba(255, 255, 255, 0.8);
-      padding: 1rem 1.5rem;
-      margin: 0.3rem 1rem;
-      border-radius: 12px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-    }
-
-    .sidebar .nav-link i {
-      font-size: 1.3rem;
-      margin-right: 1rem;
-      width: 30px;
-      text-align: center;
-    }
-
-    .sidebar .nav-link:hover,
-    .sidebar .nav-link.active {
-      background: var(--sidebar-hover);
-      color: white;
-      transform: translateX(8px);
-    }
-
-    .sidebar .nav-link.logout {
-      margin-top: auto;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      padding-top: 1.5rem;
-    }
-
-    .main-content {
-      margin-left: 280px;
-      padding: 2rem;
-      min-height: 100vh;
-    }
-
-    .card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-      color: white;
-    }
-
-    .sensor-box {
-      text-align: center;
-      padding: 2.5rem 1.5rem;
-      border-radius: 18px;
-      background: rgba(0, 0, 0, 0.25);
-      transition: all 0.4s ease;
-      height: 100%;
-    }
-
-    .sensor-box:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-    }
-
-    .sensor-icon {
-      font-size: 3.5rem;
-      margin-bottom: 1.2rem;
-    }
-
-    .sensor-value {
-      font-size: 3.5rem;
-      font-weight: 800;
-      margin: 0.8rem 0;
-    }
-
-    .sensor-unit {
-      font-size: 1.3rem;
-      opacity: 0.8;
-    }
-
-    .sensor-label {
-      font-size: 1.3rem;
-      font-weight: 600;
-    }
-
-    .status-normal {
-      background: rgba(34, 197, 94, 0.3);
-      border-left: 8px solid var(--success);
-    }
-
-    .status-error {
-      background: rgba(239, 68, 68, 0.3);
-      border-left: 8px solid var(--danger);
-    }
-
-    .main-title {
-      font-size: 3.4rem;
-      font-weight: 900;
-      text-align: center;
-      margin: 0 auto 2rem;
-      color: #ffffff;
-      letter-spacing: 2px;
-      text-shadow:
-        0 0 15px rgba(165, 216, 255, 0.9),
-        0 4px 12px rgba(0, 0, 0, 0.7),
-        3px 3px 0 #60a5fa,
-        -3px -3px 0 #93c5fd,
-        5px 5px 15px rgba(0, 0, 0, 0.5);
+      color: var(--heading-color);
       line-height: 1.2;
     }
 
-    .user-greeting {
+    /* LỜI CHÀO USER TRONG SIDEBAR */
+    .user-greeting-sidebar {
       text-align: center;
-      font-size: 2rem;
-      font-weight: 600;
-      margin-bottom: 2.5rem;
-      color: #a5d8ff;
-      text-shadow: 0 0 10px rgba(165, 216, 255, 0.6);
+      margin: 0 1rem 2rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--sidebar-text);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-
-    .user-greeting i {
-      margin-right: 0.8rem;
-      color: #ffd43b;
-    }
-
-    /* ĐỒNG HỒ THỜI GIAN THỰC - GÓC PHẢI TRÊN */
-    #live-clock {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 16px;
-      padding: 12px 20px;
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: white;
-      z-index: 2000;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 260px;
-      justify-content: center;
-    }
-
-    #live-clock i {
-      font-size: 1.8rem;
-      color: #ffd43b;
-    }
-
-    .clock-date {
+    .user-greeting-sidebar i {
       font-size: 1.1rem;
-      opacity: 0.9;
-      margin-top: 4px;
+      color: var(--info); /* Màu xanh nhạt cho icon user */
+    }
+    .user-greeting-sidebar strong {
+      color: var(--sidebar-active-text);
+      font-weight: 600;
     }
 
+    .sidebar .nav-link {
+      color: var(--sidebar-text);
+      padding: 0.9rem 1.5rem;
+      margin: 0.2rem 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex; align-items: center; text-decoration: none;
+    }
+    .sidebar .nav-link i {
+      font-size: 1.1rem;
+      margin-right: 1.2rem;
+      width: 25px; text-align: center;
+    }
+    .sidebar .nav-link:hover {
+      background-color: var(--sidebar-hover-bg);
+      color: var(--sidebar-active-text);
+      transform: translateX(5px);
+    }
+    /* Không có active mặc định cho home */
+    /* .sidebar .nav-link.active {
+      background-color: var(--sidebar-active-bg);
+      color: var(--sidebar-active-text);
+      box-shadow: 0 2px 10px rgba(0, 123, 255, 0.4);
+    } */
+    .sidebar .nav-link.logout {
+      margin-top: auto; /* Đẩy logout xuống cuối */
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      flex-grow: 1; /* Chiếm hết phần còn lại */
+      padding: 3rem;
+      display: flex; flex-direction: column;
+      align-items: center;
+    }
+
+    .main-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--heading-color);
+      margin-bottom: 3rem;
+      text-align: center;
+      letter-spacing: 1px;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    }
+    .main-subtitle {
+      font-size: 1.5rem;
+      color: var(--text-color);
+      opacity: 0.8;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    /* CARD HIỆN ĐẠI */
+    .status-card-modern {
+      background: rgba(0, 0, 0, 0.3); /* Nền hơi tối */
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 2.5rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+      width: 100%;
+      max-width: 800px;
+    }
+    .status-card-modern:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+    .status-text-modern {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0;
+    }
+    .status-normal-border { border-left: 8px solid var(--success); }
+    .status-error-border { border-left: 8px solid var(--danger); }
+    .status-warning-border { border-left: 8px solid var(--warning); }
+
+
+    .sensor-card-modern {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 15px;
+      padding: 1.8rem;
+      text-align: center;
+      height: 100%; /* Đảm bảo chiều cao đồng nhất */
+      display: flex; flex-direction: column; justify-content: space-between;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    .sensor-card-modern:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      border-color: var(--primary);
+    }
+    .sensor-icon-modern {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      line-height: 1; /* Giúp căn chỉnh icon tốt hơn */
+    }
+    .sensor-label-modern {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--info);
+      margin-bottom: 0.5rem;
+    }
+    .sensor-value-modern {
+      font-family: 'Roboto Mono', monospace; /* Font monospace cho số liệu */
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--heading-color);
+      line-height: 1.2;
+    }
+    .sensor-unit-modern {
+      font-size: 0.9rem;
+      color: var(--text-color);
+      opacity: 0.7;
+    }
+
+    /* MEDIA QUERIES (RESPONSIVE) */
     @media (max-width: 992px) {
-      .sidebar { width: 80px; }
-      .sidebar .logo h3, .sidebar .nav-link span { display: none; }
-      .sidebar .nav-link { justify-content: center; padding: 1.2rem; }
-      .main-content { margin-left: 80px; }
-      .main-title { font-size: 2.5rem; }
-      .user-greeting { font-size: 1.6rem; margin-bottom: 2rem; }
+      .sidebar { width: 80px; padding: 1.5rem 0; }
+      .sidebar .logo h3, .sidebar .nav-link span, .user-greeting-sidebar { display: none; }
+      .sidebar .logo i { margin-bottom: 0; }
+      .sidebar .nav-link { justify-content: center; padding: 1rem; margin: 0.5rem 0.5rem; }
+      .sidebar .nav-link i { margin-right: 0; }
+      
+      body { flex-direction: column; }
+      .main-content { margin-left: 0; padding: 2rem; width: 100%; }
+      #live-clock { top: unset; bottom: 10px; left: 10px; right: unset; }
+      .main-title { font-size: 2.5rem; margin-top: 1rem; }
+      .main-subtitle { font-size: 1.2rem; }
+      .status-text-modern { font-size: 1.8rem; }
+      .sensor-value-modern { font-size: 2.2rem; }
     }
 
     @media (max-width: 768px) {
-      #live-clock {
-        top: 10px;
-        right: 10px;
-        padding: 10px 16px;
-        font-size: 1.2rem;
-        min-width: 220px;
-      }
-      #live-clock i {
-        font-size: 1.5rem;
-      }
+      .main-title { font-size: 2rem; }
+      .status-text-modern { font-size: 1.5rem; }
     }
 
     @media (max-width: 576px) {
-      .main-title { font-size: 2.2rem; }
-      .user-greeting { font-size: 1.4rem; }
-      #live-clock {
-        font-size: 1.1rem;
-        padding: 8px 14px;
-        min-width: auto;
-      }
+      .main-title { font-size: 1.8rem; margin-bottom: 2rem; }
+      .status-text-modern { font-size: 1.2rem; padding: 1.5rem; }
+      .sensor-card-modern { padding: 1.2rem; }
+      .sensor-icon-modern { font-size: 2.5rem; }
+      .sensor-value-modern { font-size: 2rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Alert container -->
-  <div id="alert-container" class="container-fluid position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; max-width: 600px;"></div>
+  <div id="alert-container" class="position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 2050; width: 90%; max-width: 500px;"></div>
 
-  <!-- ĐỒNG HỒ THỜI GIAN THỰC -->
   <div id="live-clock">
     <i class="fas fa-clock"></i>
     <div>
       <div id="clock-time">--:--:--</div>
-      <div class="clock-date" id="clock-date">Đang tải...</div>
+      <div id="clock-date">Đang tải...</div>
     </div>
   </div>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="logo">
-      <i class="fas fa-microchip"></i>
-      <h3>GIÁM SÁT ĐỘNG CƠ ĐIỆN</h3>
+      <i class="fas fa-industry"></i> <h3>GIÁM SÁT ĐỘNG CƠ</h3>
     </div>
-    <nav class="nav flex-column px-3">
-       <a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Trang chủ</span></a>
-      <a href="chart.html" class="nav-link active"><i class="fas fa-chart-line"></i><span>Biểu đồ trực quan</span></a>
+    
+    <div class="user-greeting-sidebar">
+      <i class="fas fa-user-circle"></i>
+      <strong id="username-display">Đang tải...</strong>
+    </div>
+
+    <nav class="nav flex-column">
+      <a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+      <a href="chart.html" class="nav-link"><i class="fas fa-chart-line"></i><span>Biểu đồ trực quan</span></a>
       <a href="history.html" class="nav-link"><i class="fas fa-history"></i><span>Lịch sử lỗi</span></a>
       <a href="device.html" class="nav-link"><i class="fas fa-tools"></i><span>Quản lý thiết bị</span></a>
+      
       <a href="index.html" class="nav-link logout" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i>
-        <span>Đăng xuất</span>
+        <i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span>
       </a>
     </nav>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
-    <div class="container-fluid">
-      <h2 class="main-title">GIÁM SÁT TRẠNG THÁI ĐỘNG CƠ ĐIỆN</h2>
+    <h1 class="main-title">HỆ THỐNG GIÁM SÁT ĐỘNG CƠ ĐIỆN</h1>
+    <div class="status-card-modern status-normal-border" id="status-card">
+      <h2 class="status-text-modern" id="status-text">HỆ THỐNG ĐANG HOẠT ĐỘNG BÌNH THƯỜNG</h2>
+    </div>
 
-      <div class="user-greeting" id="userGreeting">
-        <i class="fas fa-user-circle"></i>
-        Đang tải thông tin người dùng...
-      </div>
-
-      <!-- Trạng thái hệ thống -->
-      <div class="row mb-5">
-        <div class="col-12">
-          <div class="card p-5 status-normal text-center" id="status-card">
-            <h2 class="mb-0">
-              <span id="status-text">ĐANG TẢI TRẠNG THÁI...</span>
-            </h2>
-          </div>
+    <div class="row g-4 w-100">
+      <div class="col-lg-4 col-md-6">
+        <div class="sensor-card-modern">
+          <i class="fas fa-tachometer-alt sensor-icon-modern text-primary"></i>
+          <div class="sensor-label-modern">Độ rung trục X</div>
+          <div class="sensor-value-modern" id="ax-value">--</div>
+          <div class="sensor-unit-modern">m/s²</div>
         </div>
       </div>
 
-      <!-- 6 Thông số cảm biến -->
-      <div class="row g-4">
-        <div class="col-lg-4 col-md-6">
-          <div class="card sensor-box">
-            <i class="fas fa-arrows-alt-h sensor-icon text-primary"></i>
-            <div class="sensor-value" id="ax-value">--</div>
-            <div class="sensor-unit">m/s²</div>
-            <div class="sensor-label">Gia tốc trục X</div>
-          </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="sensor-card-modern">
+          <i class="fas fa-wind sensor-icon-modern text-info"></i>
+          <div class="sensor-label-modern">Độ rung trục Y</div>
+          <div class="sensor-value-modern" id="ay-value">--</div>
+          <div class="sensor-unit-modern">m/s²</div>
         </div>
+      </div>
 
-        <div class="col-lg-4 col-md-6">
-          <div class="card sensor-box">
-            <i class="fas fa-arrows-alt-v sensor-icon text-success"></i>
-            <div class="sensor-value" id="ay-value">--</div>
-            <div class="sensor-unit">m/s²</div>
-            <div class="sensor-label">Gia tốc trục Y</div>
-          </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="sensor-card-modern">
+          <i class="fas fa-location-arrow sensor-icon-modern text-success"></i>
+          <div class="sensor-label-modern">Độ rung trục Z</div>
+          <div class="sensor-value-modern" id="az-value">--</div>
+          <div class="sensor-unit-modern">m/s²</div>
         </div>
+      </div>
 
-        <div class="col-lg-4 col-md-6">
-          <div class="card sensor-box">
-            <i class="fas fa-arrows-alt sensor-icon text-warning"></i>
-            <div class="sensor-value" id="az-value">--</div>
-            <div class="sensor-unit">m/s²</div>
-            <div class="sensor-label">Gia tốc trục Z</div>
-          </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="sensor-card-modern">
+          <i class="fas fa-bolt sensor-icon-modern text-danger"></i>
+          <div class="sensor-label-modern">Dòng điện</div>
+          <div class="sensor-value-modern" id="current-value">--</div>
+          <div class="sensor-unit-modern">A</div>
         </div>
+      </div>
 
-        <div class="col-lg-4 col-md-6">
-          <div class="card sensor-box">
-            <i class="fas fa-bolt sensor-icon text-danger"></i>
-            <div class="sensor-value" id="current-value">--</div>
-            <div class="sensor-unit">A</div>
-            <div class="sensor-label">Dòng điện</div>
-          </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="sensor-card-modern">
+          <i class="fas fa-charging-station sensor-icon-modern text-warning"></i>
+          <div class="sensor-label-modern">Điện áp</div>
+          <div class="sensor-value-modern" id="voltage-value">--</div>
+          <div class="sensor-unit-modern">V</div>
         </div>
+      </div>
 
-        <div class="col-lg-4 col-md-6">
-          <div class="card sensor-box">
-            <i class="fas fa-plug sensor-icon text-info"></i>
-            <div class="sensor-value" id="voltage-value">--</div>
-            <div class="sensor-unit">V</div>
-            <div class="sensor-label">Điện áp</div>
-          </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6">
-          <div class="card sensor-box">
-            <i class="fas fa-thermometer-half sensor-icon text-orange"></i>
-            <div class="sensor-value" id="temp-value">--</div>
-            <div class="sensor-unit">°C</div>
-            <div class="sensor-label">Nhiệt độ</div>
-          </div>
+      <div class="col-lg-4 col-md-6">
+        <div class="sensor-card-modern">
+          <i class="fas fa-thermometer-half sensor-icon-modern text-primary"></i>
+          <div class="sensor-label-modern">Nhiệt độ</div>
+          <div class="sensor-value-modern" id="temp-value">--</div>
+          <div class="sensor-unit-modern">°C</div>
         </div>
       </div>
     </div>
@@ -373,12 +370,12 @@
     // Hiển thị lời chào người dùng
     function updateUserGreeting() {
       const username = localStorage.getItem("username");
-      const greetingElement = document.getElementById("userGreeting");
+      const usernameDisplayElement = document.getElementById("username-display");
 
       if (username && username.trim() !== "") {
-        greetingElement.innerHTML = `<i class="fas fa-user-circle"></i> Xin chào, <strong>${username}</strong>!`;
+        usernameDisplayElement.textContent = `Xin chào, ${username}`;
       } else {
-        greetingElement.innerHTML = `<i class="fas fa-user-circle"></i> Xin chào, <strong>Guest</strong>!`;
+        usernameDisplayElement.textContent = `Xin chào, Guest`;
       }
     }
 
@@ -403,23 +400,25 @@
 
       const statusData = await getCurrentSystemStatus();
 
+      // Reset border classes
+      statusCard.classList.remove('status-normal-border', 'status-error-border', 'status-warning-border');
+
       if (!statusData) {
-        statusCard.className = "card p-5 text-center bg-warning text-dark";
+        statusCard.classList.add('status-warning-border');
         statusText.textContent = "LỖI KẾT NỐI SERVER";
         showAlert("Không thể kết nối đến server để lấy trạng thái hệ thống", "warning");
         return;
       }
 
       if (statusData.status?.toLowerCase() === "normal") {
-        statusCard.className = "card p-5 status-normal text-center";
+        statusCard.classList.add('status-normal-border');
         statusText.textContent = "HỆ THỐNG ĐANG HOẠT ĐỘNG BÌNH THƯỜNG";
         const container = document.getElementById("alert-container");
-        if (container) container.innerHTML = "";
+        if (container) container.innerHTML = ""; // Clear any previous alerts
       } else {
-        statusCard.className = "card p-5 status-error text-center";
+        statusCard.classList.add('status-error-border');
         const message = statusData.message || statusData.status || "Phát hiện bất thường";
-        statusText.textContent = `CẢNH BÁO: ${message.toUpperCase()}`;
-        showAlert(`⚠️ ${message}`, "danger");
+        statusText.textContent = ` ${message.toUpperCase()}`;
       }
     }
 
@@ -448,21 +447,19 @@
       document.getElementById('clock-date').textContent = capitalizedDate;
     }
 
-    // Khởi động
+    // Khởi động các chức năng
     updateUserGreeting();
     updateSensors();
     updateSystemStatus();
     updateLiveClock(); // Hiển thị lần đầu
 
-    // Cập nhật realtime: cảm biến + trạng thái mỗi 3s, đồng hồ mỗi 1s
+    // Cập nhật realtime: cảm biến + trạng thái mỗi 2s, đồng hồ mỗi 1s
     setInterval(() => {
       updateSensors();
-      updateLiveClock();
-    }, 1000);
-    setInterval(() => {
-      updateSystemStatus();
-    }, 50000);
-    // Expose logout function
+      updateSystemStatus(); // Cập nhật trạng thái cùng tần suất với sensor
+    }, 2000); 
+    setInterval(updateLiveClock, 1000);
+
     window.logout = logout;
   </script>
 </body>
