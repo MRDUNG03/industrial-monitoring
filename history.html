@@ -277,7 +277,7 @@
 
             <div class="footer-info">
               <i class="fas fa-sync-alt fa-spin me-1"></i>
-              Tự động cập nhật mỗi 30 giây • Dữ liệu từ server cloud
+              Tự động cập nhật mỗi 5 giây • Dữ liệu từ server cloud
             </div>
           </div>
         </div>
@@ -286,55 +286,67 @@
   </div>
 
   <!-- Script -->
-  <script type="module">
+ <script type="module">
   import { getAlertHistory, logout } from './service.js';
 
-  // HÀM MỚI: Xử lý tốt cả định dạng "YYYY-MM-DD HH:MM:SS" từ MySQL
-  // Định dạng thời gian tiếng Việt đẹp - PHIÊN BẢN MỚI HOÀN HẢO (hoạt động ngay cả khi backend chưa sửa)
-function formatTimestamp(ts) {
-  if (!ts) return "Không xác định";
+  // HÀM SỬA MỚI: Xử lý trường hợp backend KHÔNG TRẢ VỀ timestamp
+  function formatTimestamp(ts) {
+    if (!ts || ts === null || ts === undefined) {
+      // Nếu backend không trả timestamp → hiển thị thông báo rõ ràng
+      return "<span style='color: #ff6b6b; font-style: italic;'>Thiếu dữ liệu thời gian (lỗi server)</span>";
+    }
 
-  let date;
+    let date;
 
-  // Trường hợp 1: Đã là định dạng chuẩn ISO (có T và +07:00) → parse trực tiếp
-  if (typeof ts === 'string' && ts.includes('T') && (ts.includes('+') || ts.includes('Z'))) {
-    date = new Date(ts);
+    // Trường hợp 1: Chuẩn ISO có T và +07:00
+    if (typeof ts === 'string' && ts.includes('T') && (ts.includes('+') || ts.includes('Z'))) {
+      date = new Date(ts);
+    }
+    // Trường hợp 2: Định dạng MySQL "2025-12-26 10:30:45"
+    else if (typeof ts === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(ts.trim())) {
+      const isoString = ts.trim().replace(' ', 'T') + '+07:00';
+      date = new Date(isoString);
+    }
+    // Trường hợp 3: Các kiểu khác
+    else {
+      date = new Date(ts);
+    }
+
+    if (isNaN(date.getTime())) {
+      return "Không hợp lệ";
+    }
+
+    return date.toLocaleString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
   }
-  // Trường hợp 2: Định dạng MySQL phổ biến "YYYY-MM-DD HH:MM:SS" (ví dụ: "2025-12-26 10:30:45")
-  else if (typeof ts === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(ts.trim())) {
-    // Chuyển thành chuẩn ISO bằng cách thay khoảng trắng bằng T và thêm +07:00 (giờ Việt Nam)
-    const isoString = ts.trim().replace(' ', 'T') + '+07:00';
-    date = new Date(isoString);
-  }
-  // Trường hợp 3: Các định dạng khác (an toàn)
-  else {
-    date = new Date(ts);
-  }
 
-  // Kiểm tra xem có phải là ngày hợp lệ không
-  if (isNaN(date.getTime())) {
-    return "Không hợp lệ";
-  }
-
-  // Trả về định dạng đẹp tiếng Việt
-  return date.toLocaleString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
-}
-
-  // Phần còn lại giữ nguyên
   async function loadHistory() {
     const tbody = document.getElementById('historyTableBody');
-    const alerts = await getAlertHistory();
+    let alerts;
+    
+    try {
+      alerts = await getAlertHistory();
+    } catch (error) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="3" class="no-data py-5 text-danger">
+            <i class="fas fa-exclamation-circle fa-3x mb-4"></i><br>
+            <strong>Lỗi kết nối server!</strong><br>
+            Không thể tải lịch sử cảnh báo.
+          </td>
+        </tr>`;
+      return;
+    }
 
     tbody.innerHTML = '';
 
-    if (alerts.length === 0) {
+    if (!alerts || alerts.length === 0) {
       tbody.innerHTML = `
         <tr>
           <td colspan="3" class="no-data py-5">
@@ -346,7 +358,8 @@ function formatTimestamp(ts) {
       return;
     }
 
-    alerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // Sắp xếp mới nhất lên đầu (dùng id hoặc thời gian nếu có)
+    alerts.sort((a, b) => (b.id || 0) - (a.id || 0));
 
     alerts.forEach(alert => {
       const row = document.createElement('tr');
@@ -359,14 +372,21 @@ function formatTimestamp(ts) {
     });
   }
 
-  // Đồng hồ thời gian thực (giữ nguyên)
+  // Đồng hồ thời gian thực
   function updateLiveClock() {
     const now = new Date();
-    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-    const dateOptions = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
-
-    const timeStr = now.toLocaleTimeString('vi-VN', timeOptions);
-    const dateStr = now.toLocaleDateString('vi-VN', dateOptions);
+    const timeStr = now.toLocaleTimeString('vi-VN', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit', 
+      hour12: false 
+    });
+    const dateStr = now.toLocaleDateString('vi-VN', { 
+      weekday: 'long', 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    });
     const capitalizedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
 
     document.getElementById('clock-time').textContent = timeStr;
@@ -377,8 +397,9 @@ function formatTimestamp(ts) {
   loadHistory();
   updateLiveClock();
 
-  setInterval(loadHistory, 5000);
-  setInterval(updateLiveClock, 1000);
+  // Tự động cập nhật
+  setInterval(loadHistory, 5000);     // Mỗi 5 giây
+  setInterval(updateLiveClock, 1000); // Mỗi giây
 
   window.logout = logout;
 </script>
