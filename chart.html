@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Biểu Đồ Trực Quan - Giám Sát Động Cơ Điện</title>
+  <title>Biểu Đồ Trực Quan - Giám Sát Động Cơ</title>
   
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -25,251 +22,111 @@
     }
 
     body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
+      margin: 0; padding: 0; min-height: 100vh;
       background: linear-gradient(135deg, #1e3a8a, #1e40af);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: white;
-      overflow-x: hidden;
+      font-family: 'Segoe UI', sans-serif; color: white; overflow-x: hidden;
     }
 
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 280px;
-      height: 100vh;
-      background: var(--sidebar-bg);
-      backdrop-filter: blur(10px);
-      border-right: 1px solid var(--glass-border);
-      padding: 1.5rem 0;
-      z-index: 1000;
+      position: fixed; top: 0; left: 0; width: 280px; height: 100vh;
+      background: var(--sidebar-bg); backdrop-filter: blur(10px);
+      border-right: 1px solid var(--glass-border); padding: 1.5rem 0; z-index: 1000;
     }
 
-    .sidebar .logo { 
-      text-align: center; 
-      padding: 1rem; 
-      margin-bottom: 2rem; 
-      border-bottom: 1px solid rgba(255,255,255,0.1); 
-    }
-    .sidebar .logo i { 
-      font-size: 3.5rem; 
-      color: #a5d8ff; 
-    }
-    .sidebar .logo h3 { 
-      margin: 1rem 0 0; 
-      font-weight: 700; 
-      color: white; 
-    }
+    .sidebar .logo { text-align: center; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar .logo i { font-size: 3rem; color: #a5d8ff; }
+    .sidebar .logo h3 { font-size: 1.2rem; margin-top: 10px; font-weight: 700; }
 
     .sidebar .nav-link {
-      color: rgba(255,255,255,0.8); 
-      padding: 1rem 1.5rem; 
-      margin: 0.3rem 1rem;
-      border-radius: 12px; 
-      font-weight: 500; 
-      transition: all 0.3s ease; 
-      display: flex; 
-      align-items: center;
+      color: rgba(255,255,255,0.8); padding: 1rem 1.5rem; margin: 0.3rem 1rem;
+      border-radius: 12px; transition: all 0.3s ease; display: flex; align-items: center; text-decoration: none;
     }
-    .sidebar .nav-link i { 
-      font-size: 1.3rem; 
-      margin-right: 1rem; 
-      width: 30px; 
-      text-align: center; 
-    }
-    .sidebar .nav-link:hover, 
-    .sidebar .nav-link.active { 
-      background: var(--sidebar-hover); 
-      color: white; 
-      transform: translateX(8px); 
-    }
-    .sidebar .nav-link.logout { 
-      margin-top: auto; 
-      border-top: 1px solid rgba(255,255,255,0.1); 
-      padding-top: 1.5rem; 
-    }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active { background: var(--sidebar-hover); color: white; }
+    .sidebar .nav-link i { margin-right: 15px; width: 25px; text-align: center; }
 
-    .main-content { 
-      margin-left: 280px; 
-      padding: 2.5rem 2rem; 
-      min-height: 100vh; 
-    }
+    .main-content { margin-left: 280px; padding: 2.5rem 2rem; }
 
     .main-title {
-      font-size: 3.4rem;
-      font-weight: 900;
-      text-align: center;
-      margin-bottom: 3rem;
-      color: #ffffff;
-      letter-spacing: 2px;
-      text-shadow: 0 0 15px rgba(165,216,255,0.9), 0 4px 12px rgba(0,0,0,0.7);
+      font-size: 2.5rem; font-weight: 900; text-align: center; margin-bottom: 3rem;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
     .chart-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      border-radius: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-      padding: 2rem;
-      height: 480px;
-      display: flex;
-      flex-direction: column;
+      background: var(--glass-bg); backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border); border-radius: 20px;
+      padding: 1.5rem; height: 400px; display: flex; flex-direction: column;
+      margin-bottom: 2rem;
     }
 
-    .chart-card h5 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: white;
-    }
+    .chart-card h5 { text-align: center; margin-bottom: 1rem; font-weight: 600; }
 
-    .chart-container {
-      flex: 1;
-      position: relative;
-    }
+    canvas { background: white !important; border-radius: 12px; padding: 10px; flex-grow: 1; }
 
-    canvas {
-      background: white !important;
-      border-radius: 16px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-    }
-
-    /* ĐỒNG HỒ THỜI GIAN THỰC - GÓC PHẢI TRÊN */
     #live-clock {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 16px;
-      padding: 12px 20px;
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: white;
-      z-index: 2000;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 260px;
-      justify-content: center;
+      position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.5);
+      padding: 10px 20px; border-radius: 15px; border: 1px solid var(--glass-border);
+      display: flex; align-items: center; gap: 15px; z-index: 2000;
     }
-
-    #live-clock i {
-      font-size: 1.8rem;
-      color: #ffd43b;
-    }
-
-    .clock-date {
-      font-size: 1.1rem;
-      opacity: 0.9;
-      margin-top: 4px;
-    }
+    #clock-time { font-size: 1.4rem; font-weight: bold; }
+    #clock-date { font-size: 0.9rem; opacity: 0.8; }
 
     @media (max-width: 992px) {
       .sidebar { width: 80px; }
-      .sidebar .logo h3, .sidebar .nav-link span { display: none; }
-      .sidebar .nav-link { justify-content: center; padding: 1.2rem; }
-      .main-content { margin-left: 80px; padding: 2rem 1.5rem; }
-      .main-title { font-size: 2.6rem; }
-      .chart-card { height: 380px; padding: 1.5rem; }
-      .chart-card h5 { font-size: 1.3rem; }
-      #live-clock {
-        top: 10px;
-        right: 10px;
-        padding: 10px 16px;
-        font-size: 1.2rem;
-        min-width: 220px;
-      }
-      #live-clock i { font-size: 1.5rem; }
-    }
-
-    @media (max-width: 576px) {
-      .main-title { font-size: 2.2rem; margin-bottom: 2rem; }
-      .chart-card { height: 340px; padding: 1.2rem; }
-      .chart-card h5 { font-size: 1.2rem; }
-      #live-clock {
-        font-size: 1.1rem;
-        padding: 8px 14px;
-        min-width: auto;
-      }
+      .sidebar span, .sidebar h3 { display: none; }
+      .main-content { margin-left: 80px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ĐỒNG HỒ THỜI GIAN THỰC -->
   <div id="live-clock">
-    <i class="fas fa-clock"></i>
+    <i class="fas fa-clock fa-2x text-warning"></i>
     <div>
       <div id="clock-time">--:--:--</div>
-      <div class="clock-date" id="clock-date">Đang tải...</div>
+      <div id="clock-date">Đang tải...</div>
     </div>
   </div>
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="logo">
       <i class="fas fa-microchip"></i>
-      <h3>GIÁM SÁT ĐỘNG CƠ ĐIỆN</h3>
+      <h3>ĐỘNG CƠ ĐIỆN</h3>
     </div>
-    <nav class="nav flex-column px-3">
+    <nav class="nav flex-column">
       <a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Trang chủ</span></a>
-      <a href="chart.html" class="nav-link active"><i class="fas fa-chart-line"></i><span>Biểu đồ trực quan</span></a>
-      <a href="history.html" class="nav-link"><i class="fas fa-history"></i><span>Lịch sử hoạt động</span></a>
-      <a href="device.html" class="nav-link"><i class="fas fa-microchip"></i><span>Quản lý thiết bị</span></a>
-      <a href="index.html" class="nav-link logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a>
+      <a href="chart.html" class="nav-link active"><i class="fas fa-chart-line"></i><span>Biểu đồ</span></a>
+      <a href="history.html" class="nav-link"><i class="fas fa-history"></i><span>Lịch sử</span></a>
+      <a href="device.html" class="nav-link"><i class="fas fa-tools"></i><span>Thiết bị</span></a>
+      <a href="#" class="nav-link mt-auto" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a>
     </nav>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
+    <h2 class="main-title">HỆ THỐNG BIỂU ĐỒ REALTIME</h2>
     <div class="container-fluid">
-      <h2 class="main-title">BIỂU ĐỒ TRỰC QUAN</h2>
-
-      <div class="row g-5">
-        <!-- Trục X - Line Chart -->
-        <div class="col-lg-6 col-md-12">
+      <div class="row">
+        <div class="col-md-6">
           <div class="chart-card">
-            <h5>Trục X (m/s²)</h5>
-            <div class="chart-container">
-              <canvas id="axChart"></canvas>
-            </div>
+            <h5>Rung động Trục X (m/s²)</h5>
+            <canvas id="axChart"></canvas>
           </div>
         </div>
-
-        <!-- Dòng điện - Line Chart -->
-        <div class="col-lg-6 col-md-12">
+        <div class="col-md-6">
           <div class="chart-card">
-            <h5>Dòng điện (A)</h5>
-            <div class="chart-container">
-              <canvas id="currentChart"></canvas>
-            </div>
+            <h5>Dòng điện tiêu thụ (A)</h5>
+            <canvas id="currentChart"></canvas>
           </div>
         </div>
-
-        <!-- Điện áp - Line Chart -->
-        <div class="col-lg-6 col-md-12">
+        <div class="col-md-6">
           <div class="chart-card">
-            <h5>Điện áp (V)</h5>
-            <div class="chart-container">
-              <canvas id="voltageChart"></canvas>
-            </div>
+            <h5>Điện áp hoạt động (V)</h5>
+            <canvas id="voltageChart"></canvas>
           </div>
         </div>
-
-        <!-- Nhiệt độ - Line Chart -->
-        <div class="col-lg-6 col-md-12">
+        <div class="col-md-6">
           <div class="chart-card">
-            <h5>Nhiệt độ (°C)</h5>
-            <div class="chart-container">
-              <canvas id="tempChart"></canvas>
-            </div>
+            <h5>Nhiệt độ động cơ (°C)</h5>
+            <canvas id="tempChart"></canvas>
           </div>
         </div>
       </div>
@@ -277,170 +134,90 @@
   </div>
 
   <script type="module">
-    // Import logout function (nếu có file service.js)
-    // import { logout } from './service.js';
+    import { getLatestSensorData, logout } from './service.js';
 
-    // Số điểm tối đa hiển thị trên biểu đồ (60 điểm = 1 phút dữ liệu)
-    const MAX_POINTS = 60;
+    const MAX_POINTS = 50;
+    const charts = {};
 
-    // Lấy dữ liệu từ cloud API
-    async function fetchSensorData() {
-      try {
-        const res = await fetch('http://192.168.1.15:8000/getdata/?limit=1');
-        if (!res.ok) throw new Error('API lỗi');
-        const data = await res.json();
-        return data.length > 0 ? data[0] : null;
-      } catch (err) {
-        console.error("Lỗi lấy dữ liệu:", err);
-        return null;
-      }
-    }
-
-    // Tạo Line Chart
-    function createLineChart(id, label, color) {
-      return new Chart(document.getElementById(id), {
+    // Hàm khởi tạo biểu đồ
+    function initChart(id, label, color) {
+      const ctx = document.getElementById(id).getContext('2d');
+      return new Chart(ctx, {
         type: 'line',
-        data: { 
-          labels: [], 
-          datasets: [{ 
-            label, 
-            data: [], 
-            borderColor: color, 
-            tension: 0.4, 
-            fill: false, 
-            pointRadius: 1.5 
-          }] 
+        data: {
+          labels: [],
+          datasets: [{
+            label: label,
+            data: [],
+            borderColor: color,
+            backgroundColor: color + '20',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
             x: { display: false },
-            y: { 
-              title: { 
-                display: true, 
-                text: label, 
-                color: '#333', 
-                font: { size: 14 } 
-              }, 
-              ticks: { 
-                color: '#333', 
-                font: { size: 12 } 
-              } 
-            }
+            y: { beginAtZero: false, ticks: { color: '#333' } }
           },
           plugins: { legend: { display: false } }
         }
       });
     }
 
-    // Tạo Bar Chart cho trục X
-    function createBarChart(id, label, color) {
-      return new Chart(document.getElementById(id), {
-        type: 'bar',
-        data: { 
-          labels: [], 
-          datasets: [{ 
-            label, 
-            data: [], 
-            backgroundColor: color + 'B0', 
-            borderColor: color, 
-            borderWidth: 1 
-          }] 
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: { 
-              beginAtZero: false, 
-              title: { 
-                display: true, 
-                text: label, 
-                color: '#333', 
-                font: { size: 14 } 
-              }, 
-              ticks: { 
-                color: '#333', 
-                font: { size: 12 } 
-              } 
-            },
-            x: { display: false }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
+    // Khởi tạo 4 biểu đồ
+    charts.ax = initChart('axChart', 'Gia tốc X', '#10b981');
+    charts.current = initChart('currentChart', 'Dòng điện', '#ef4444');
+    charts.voltage = initChart('voltageChart', 'Điện áp', '#3b82f6');
+    charts.temp = initChart('tempChart', 'Nhiệt độ', '#f97316');
 
-    // Khởi tạo biểu đồ
-    const axChart      = createLineChart('axChart', 'Trục X (m/s²)', '#10b981');
-    const currentChart = createLineChart('currentChart', 'Dòng điện (A)', '#ef4444');
-    const voltageChart = createLineChart('voltageChart', 'Điện áp (V)', '#3b82f6');
-    const tempChart    = createLineChart('tempChart', 'Nhiệt độ (°C)', '#f97316');
+    // Cập nhật dữ liệu từ service
+    async function updateData() {
+      const data = await getLatestSensorData();
+      if (!data) return;
 
-    // Cập nhật dữ liệu biểu đồ
-    async function updateCharts() {
-      const d = await fetchSensorData();
-      if (!d) return;
+      const timeLabel = new Date().toLocaleTimeString('vi-VN', { hour12: false });
 
-      const label = new Date(d.timestamp).toLocaleTimeString("vi-VN");
+      const mapping = {
+        ax: data.ax,
+        current: data.current,
+        voltage: data.voltage,
+        temp: data.temp
+      };
 
-      function push(chart, value) {
-        chart.data.labels.push(label);
-        chart.data.datasets[0].data.push(value ?? 0);
+      Object.keys(charts).forEach(key => {
+        const chart = charts[key];
+        chart.data.labels.push(timeLabel);
+        chart.data.datasets[0].data.push(mapping[key]);
 
         if (chart.data.labels.length > MAX_POINTS) {
           chart.data.labels.shift();
           chart.data.datasets[0].data.shift();
         }
-        chart.update('quiet');
-      }
-
-      push(axChart, d.ax);
-      push(currentChart, d.current);
-      push(voltageChart, d.voltage);
-      push(tempChart, d.temp);
+        chart.update('none'); // Update mượt mà không cần hiệu ứng nhảy
+      });
     }
 
-    // Cập nhật đồng hồ thời gian thực
-    function updateLiveClock() {
+    // Đồng hồ
+    function updateClock() {
       const now = new Date();
-      
-      const timeOptions = { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit', 
-        hour12: false 
-      };
-      const dateOptions = { 
-        weekday: 'long', 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric' 
-      };
-
-      const timeStr = now.toLocaleTimeString('vi-VN', timeOptions);
-      const dateStr = now.toLocaleDateString('vi-VN', dateOptions);
-      const capitalizedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-
-      document.getElementById('clock-time').textContent = timeStr;
-      document.getElementById('clock-date').textContent = capitalizedDate;
+      document.getElementById('clock-time').textContent = now.toLocaleTimeString('vi-VN', { hour12: false });
+      document.getElementById('clock-date').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    // Logout function (demo)
-    window.logout = function() {
-      if (confirm('Bạn có chắc muốn đăng xuất?')) {
-        window.location.href = 'index.html';
-      }
-    };
+    // Sự kiện Đăng xuất
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      if(confirm('Bạn có muốn đăng xuất?')) logout();
+    });
 
-    // Khởi động
-    updateCharts();
-    updateLiveClock();
-
-    // Cập nhật định kỳ
-    setInterval(updateCharts, 1000);    // Biểu đồ mỗi 1 giây
-    setInterval(updateLiveClock, 1000); // Đồng hồ mỗi 1 giây
+    // Chạy định kỳ
+    setInterval(updateData, 1000);
+    setInterval(updateClock, 1000);
+    updateClock();
   </script>
 </body>
 </html>
