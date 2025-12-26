@@ -58,82 +58,114 @@
     .sidebar .nav-link:hover, .sidebar .nav-link.active { background: var(--sidebar-hover); color: white; transform: translateX(8px); }
     .sidebar .nav-link.logout { margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; }
 
-    .main-content { margin-left: 280px; padding: 2rem; min-height: 100vh; }
+    .main-content { margin-left: 280px; padding: 2.5rem 2rem; min-height: 100vh; }
 
-    .card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+    .main-title {
+      font-size: 3.4rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: #ffffff;
+      letter-spacing: 2px;
+      text-shadow: 0 0 15px rgba(165,216,255,0.9), 0 4px 12px rgba(0,0,0,0.7);
     }
 
     .history-card {
-      background: #ffffff !important;
-      color: #000000;
-      border: 1px solid #ccc;
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
       overflow: hidden;
+      padding: 2.5rem;
     }
 
-    /* Khu vực bảng lịch sử có chiều cao cố định và thanh cuộn */
+    .history-card h5 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
     .history-table-container {
-      max-height: 70vh;           /* Chiều cao tối đa ~70% màn hình */
-      overflow-y: auto;           /* Thanh cuộn dọc khi vượt quá */
-      border-radius: 15px;
+      max-height: 68vh;
+      overflow-y: auto;
+      border-radius: 16px;
+      background: white;
+      box-shadow: inset 0 4px 10px rgba(0,0,0,0.1);
     }
 
     .history-table {
       width: 100%;
       border-collapse: separate;
-      border-spacing: 0 10px;
-      margin-bottom: 0;
-    }
-
-    .history-table th, .history-table td {
-      padding: 1rem;
-      text-align: center;
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      color: #000;
+      border-spacing: 0 12px;
+      margin: 0;
     }
 
     .history-table th {
       background: #0d6efd;
       color: white;
+      padding: 1.4rem;
+      font-weight: 600;
       position: sticky;
       top: 0;
       z-index: 10;
-    }
-
-    .history-table tr:hover {
-      background: #e9ecef;
-    }
-
-    .error-col { 
-      color: var(--danger); 
-      font-weight: bold; 
-    }
-
-    .main-title {
-      font-size: 3.2rem;
-      font-weight: 900;
       text-align: center;
-      margin: 0 auto 3rem;
-      color: #ffffff;
-      letter-spacing: 2px;
-      text-shadow: 0 0 15px rgba(165,216,255,0.9), 0 4px 12px rgba(0,0,0,0.7);
+      font-size: 1.1rem;
+    }
+
+    .history-table td {
+      padding: 1.4rem;
+      background: #f8f9fa;
+      text-align: center;
+      font-size: 1.05rem;
+    }
+
+    .history-table tr:hover td {
+      background: #e9ecef;
+      transition: 0.3s;
+    }
+
+    .error-type {
+      font-weight: bold;
+      color: var(--danger);
+    }
+
+    .alert-message {
+      color: #333;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #666;
+      font-style: italic;
+      font-size: 1.2rem;
+    }
+
+    .footer-info {
+      text-align: center;
+      margin-top: 2rem;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.95rem;
     }
 
     @media (max-width: 992px) {
       .sidebar { width: 80px; }
       .sidebar .logo h3, .sidebar .nav-link span { display: none; }
       .sidebar .nav-link { justify-content: center; padding: 1.2rem; }
-      .main-content { margin-left: 80px; }
-      .main-title { font-size: 2.4rem; }
+      .main-content { margin-left: 80px; padding: 2rem 1.5rem; }
+      .main-title { font-size: 2.6rem; }
+      .history-card { padding: 2rem; }
+      .history-card h5 { font-size: 1.5rem; }
       .history-table-container { max-height: 60vh; }
+      .history-table th, .history-table td { padding: 1rem; font-size: 0.95rem; }
+    }
+
+    @media (max-width: 576px) {
+      .main-title { font-size: 2.2rem; margin-bottom: 2rem; }
+      .history-card { padding: 1.5rem; }
+      .history-table th, .history-table td { padding: 0.8rem; font-size: 0.9rem; }
     }
   </style>
 </head>
@@ -146,44 +178,51 @@
       <h3>GIÁM SÁT ĐỘNG CƠ ĐIỆN</h3>
     </div>
     <nav class="nav flex-column px-3">
-      <a href="home.html" class="nav-link">
-        <i class="fas fa-home"></i><span>Trang chủ</span>
-      </a>
-      <a href="chart.html" class="nav-link">
-        <i class="fas fa-chart-line"></i><span>Biểu đồ trực quan</span>
-      </a>
-      <a href="history.html" class="nav-link active">
-        <i class="fas fa-history"></i><span>Lịch sử hoạt động</span>
-      </a>
-      <a href="#" class="nav-link logout" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span>
-      </a>
+      <a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Trang chủ</span></a>
+      <a href="chart.html" class="nav-link"><i class="fas fa-chart-line"></i><span>Biểu đồ trực quan</span></a>
+      <a href="history.html" class="nav-link active"><i class="fas fa-history"></i><span>Lịch sử hoạt động</span></a>
+      <a href="device.html" class="nav-link"><i class="fas fa-microchip"></i><span>Quản lý thiết bị</span></a>
+      <a href="index.html" class="nav-link logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Đăng xuất</span></a>
     </nav>
   </div>
 
   <!-- Main Content -->
   <div class="main-content">
     <div class="container-fluid">
-      <h2 class="main-title">LỊCH SỬ HOẠT ĐỘNG</h2>
+      <h2 class="main-title">LỊCH SỬ HOẠT ĐỘNG & CẢNH BÁO</h2>
 
-      <div class="row g-4">
-        <div class="col-12">
-          <div class="card history-card">
-            <h5 class="text-center mb-4 text-dark">Dữ liệu lịch sử cảnh báo</h5>
-            
-            <!-- Khu vực bảng có thanh cuộn -->
+      <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
+          <div class="history-card">
+            <h5>
+              <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+              Danh sách các lần phát hiện bất thường
+            </h5>
+
+            <!-- Bảng lịch sử -->
             <div class="history-table-container">
               <table class="history-table">
                 <thead>
                   <tr>
-                    <th>Loại lỗi</th>
-                    <th>Thông báo</th>
+                    <th width="25%">Thời gian</th>
+                    <th width="20%">Loại lỗi</th>
+                    <th width="55%">Thông báo chi tiết</th>
                   </tr>
                 </thead>
                 <tbody id="historyTableBody">
-                  <!-- Dữ liệu sẽ được load từ API -->
+                  <tr>
+                    <td colspan="3" class="no-data">
+                      <i class="fas fa-spinner fa-spin fa-2x mb-3"></i><br>
+                      Đang tải lịch sử cảnh báo...
+                    </td>
+                  </tr>
                 </tbody>
               </table>
+            </div>
+
+            <div class="footer-info">
+              <i class="fas fa-sync-alt fa-spin me-1"></i>
+              Tự động cập nhật mỗi 30 giây • Dữ liệu từ server cloud
             </div>
           </div>
         </div>
@@ -191,54 +230,67 @@
     </div>
   </div>
 
-  <script>
-    const API_URL = "http://127.0.0.1:8000";
+  <!-- Script: Chỉ sử dụng service.js -->
+  <script type="module">
+    import { getAlertHistory, logout } from './service.js';
 
+    // Định dạng thời gian tiếng Việt đẹp
+    function formatTimestamp(ts) {
+      if (!ts) return "Không xác định";
+      const date = new Date(ts);
+      if (isNaN(date)) return "Không hợp lệ";
+      return date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    // Load và hiển thị lịch sử
     async function loadHistory() {
-      try {
-        const res = await fetch(`${API_URL}/GetAlert/`);
-        if (!res.ok) throw new Error('API lỗi: ' + res.status);
+      const tbody = document.getElementById('historyTableBody');
+      const alerts = await getAlertHistory();
 
-        const alerts = await res.json();
+      tbody.innerHTML = '';
 
-        const tbody = document.getElementById('historyTableBody');
-        tbody.innerHTML = '';
-
-        // Sắp xếp mới nhất trước (theo timestamp)
-        alerts.sort((a, b) => {
-          const timeA = a.timestamp || '';
-          const timeB = b.timestamp || '';
-          return timeB.localeCompare(timeA);
-        });
-
-        alerts.forEach(alert => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td class="error-col">${alert.alert || 'Không xác định'}</td>
-            <td class="error-col">${alert.message || 'Không có thông báo'}</td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        if (alerts.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="2" class="text-center py-4">Không có lịch sử cảnh báo</td></tr>';
-        }
-
-      } catch (err) {
-        console.error("Lỗi tải lịch sử:", err);
-        document.getElementById('historyTableBody').innerHTML = 
-          '<tr><td colspan="2" class="text-center text-danger py-4">Lỗi kết nối server</td></tr>';
+      if (alerts.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="3" class="no-data py-5">
+              <i class="fas fa-check-circle text-success fa-3x mb-4"></i><br>
+              <strong>Chưa có cảnh báo nào!</strong><br>
+              <small>Hệ thống đang hoạt động bình thường và an toàn.</small>
+            </td>
+          </tr>`;
+        return;
       }
+
+      // Sắp xếp: mới nhất lên đầu
+      alerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      alerts.forEach(alert => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${formatTimestamp(alert.timestamp)}</td>
+          <td class="error-type">${alert.alert || 'LỖI CHUNG'}</td>
+          <td class="alert-message">${alert.message || 'Không có mô tả chi tiết'}</td>
+        `;
+        tbody.appendChild(row);
+      });
     }
 
-    // Tự động reload mỗi 30 giây
+    // Tự động cập nhật
     setInterval(loadHistory, 30000);
-    loadHistory(); // Load ngay khi mở trang
+    loadHistory(); // Load lần đầu
 
-    function logout() {
-      localStorage.clear();
-      window.location.href = "login.html";
-    }
+    // Logout từ service.js
+    window.logout = logout;
   </script>
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -158,7 +158,7 @@
       font-size: 3.4rem;
       font-weight: 900;
       text-align: center;
-      margin: 0 auto 3rem;
+      margin: 0 auto 2rem;
       color: #ffffff;
       letter-spacing: 2px;
       text-shadow:
@@ -170,20 +170,40 @@
       line-height: 1.2;
     }
 
+    /* MỚI: Lời chào người dùng */
+    .user-greeting {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 2.5rem;
+      color: #a5d8ff;
+      text-shadow: 0 0 10px rgba(165, 216, 255, 0.6);
+    }
+
+    .user-greeting i {
+      margin-right: 0.8rem;
+      color: #ffd43b;
+    }
+
     @media (max-width: 992px) {
       .sidebar { width: 80px; }
       .sidebar .logo h3, .sidebar .nav-link span { display: none; }
       .sidebar .nav-link { justify-content: center; padding: 1.2rem; }
       .main-content { margin-left: 80px; }
       .main-title { font-size: 2.5rem; }
+      .user-greeting { font-size: 1.6rem; margin-bottom: 2rem; }
     }
 
     @media (max-width: 576px) {
-      .main-title { font-size: 2.2rem; letter-spacing: 1px; }
+      .main-title { font-size: 2.2rem; }
+      .user-greeting { font-size: 1.4rem; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Alert container -->
+  <div id="alert-container" class="container-fluid position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; max-width: 600px;"></div>
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -192,7 +212,7 @@
       <h3>GIÁM SÁT ĐỘNG CƠ ĐIỆN</h3>
     </div>
     <nav class="nav flex-column px-3">
-      <a href="dashboard.html" class="nav-link active">
+      <a href="home.html" class="nav-link active">
         <i class="fas fa-home"></i>
         <span>Trang chủ</span>
       </a>
@@ -204,7 +224,11 @@
         <i class="fas fa-history"></i>
         <span>Lịch sử hoạt động</span>
       </a>
-      <a href="login.html" class="nav-link logout" onclick="logout()">
+      <a href="device.html" class="nav-link">
+        <i class="fas fa-microchip"></i>
+        <span>Quản lý thiết bị</span>
+      </a>
+      <a href="index.html" class="nav-link logout" onclick="logout()">
         <i class="fas fa-sign-out-alt"></i>
         <span>Đăng xuất</span>
       </a>
@@ -215,6 +239,12 @@
   <div class="main-content">
     <div class="container-fluid">
       <h2 class="main-title">GIÁM SÁT TRẠNG THÁI ĐỘNG CƠ ĐIỆN</h2>
+
+      <!-- MỚI: Lời chào người dùng -->
+      <div class="user-greeting" id="userGreeting">
+        <i class="fas fa-user-circle"></i>
+        Đang tải thông tin người dùng...
+      </div>
 
       <!-- Trạng thái hệ thống -->
       <div class="row mb-5">
@@ -286,70 +316,80 @@
     </div>
   </div>
 
-  <script>
-    const API_URL = "http://127.0.0.1:8000";
+  <script type="module">
+    import { 
+      getLatestSensorData, 
+      getCurrentSystemStatus, 
+      showAlert, 
+      logout 
+    } from './service.js';
 
-    // Cập nhật giá trị cảm biến mới nhất
+    // MỚI: Hiển thị lời chào người dùng
+    function updateUserGreeting() {
+      const username = localStorage.getItem("username");
+      const greetingElement = document.getElementById("userGreeting");
+
+      if (username && username.trim() !== "") {
+        greetingElement.innerHTML = `<i class="fas fa-user-circle"></i> Xin chào, <strong>${username}</strong>!`;
+      } else {
+        greetingElement.innerHTML = `<i class="fas fa-user-circle"></i> Xin chào, <strong>Guest</strong>!`;
+      }
+    }
+
+    // Cập nhật dữ liệu cảm biến
     async function updateSensors() {
-      try {
-        const res = await fetch(`${API_URL}/GetData/`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.length === 0) return;
+      const latest = await getLatestSensorData();
+      
+      if (!latest) return;
 
-        const latest = data[data.length - 1]; // Lấy bản ghi mới nhất
-
-        document.getElementById("ax-value").textContent = latest.ax?.toFixed(3) || "--";
-        document.getElementById("ay-value").textContent = latest.ay?.toFixed(3) || "--";
-        document.getElementById("az-value").textContent = latest.az?.toFixed(3) || "--";
-        document.getElementById("current-value").textContent = latest.current?.toFixed(2) || "--";
-        document.getElementById("voltage-value").textContent = latest.voltage?.toFixed(2) || "--";
-        document.getElementById("temp-value").textContent = latest.temp?.toFixed(1) || "--";
-      } catch (err) {
-        console.error("Lỗi cập nhật cảm biến:", err);
-      }
+      document.getElementById("ax-value").textContent = latest.ax?.toFixed(3) ?? "--";
+      document.getElementById("ay-value").textContent = latest.ay?.toFixed(3) ?? "--";
+      document.getElementById("az-value").textContent = latest.az?.toFixed(3) ?? "--";
+      document.getElementById("current-value").textContent = latest.current?.toFixed(2) ?? "--";
+      document.getElementById("voltage-value").textContent = latest.voltage?.toFixed(2) ?? "--";
+      document.getElementById("temp-value").textContent = latest.temp?.toFixed(1) ?? "--";
     }
 
-    // Cập nhật trạng thái hệ thống từ bảng current_status (realtime chính xác)
+    // Cập nhật trạng thái hệ thống
     async function updateSystemStatus() {
-      try {
-        const res = await fetch(`${API_URL}/GetStatus/`);
-        if (!res.ok) throw new Error("API lỗi");
+      const statusCard = document.getElementById("status-card");
+      const statusText = document.getElementById("status-text");
 
-        const data = await res.json();
+      const statusData = await getCurrentSystemStatus();
 
-        const statusCard = document.getElementById("status-card");
-        const statusText = document.getElementById("status-text");
+      if (!statusData) {
+        statusCard.className = "card p-5 text-center bg-warning text-dark";
+        statusText.textContent = "LỖI KẾT NỐI SERVER";
+        showAlert("Không thể kết nối đến server để lấy trạng thái hệ thống", "warning");
+        return;
+      }
 
-        if (data.status === "Normal") {
-          statusCard.className = "card p-5 status-normal text-center";
-          statusText.textContent = "HỆ THỐNG ĐANG HOẠT ĐỘNG BÌNH THƯỜNG";
-        } else {
-          statusCard.className = "card p-5 status-error text-center";
-          statusText.textContent = data.message || `PHÁT HIỆN LỖI: ${data.status.toUpperCase()}`;
-        }
-      } catch (err) {
-        console.error("Lỗi cập nhật trạng thái hệ thống:", err);
-        document.getElementById("status-text").textContent = "LỖI KẾT NỐI SERVER";
-        document.getElementById("status-card").className = "card p-5 text-center bg-warning";
+      if (statusData.status?.toLowerCase() === "normal") {
+        statusCard.className = "card p-5 status-normal text-center";
+        statusText.textContent = "HỆ THỐNG ĐANG HOẠT ĐỘNG BÌNH THƯỜNG";
+        const container = document.getElementById("alert-container");
+        if (container) container.innerHTML = "";
+      } else {
+        statusCard.className = "card p-5 status-error text-center";
+        const message = statusData.message || statusData.status || "Phát hiện bất thường";
+        statusText.textContent = `CẢNH BÁO: ${message.toUpperCase()}`;
+        showAlert(`⚠️ ${message}`, "danger");
       }
     }
 
-    // Cập nhật liên tục mỗi 3 giây
+    // Khởi động
+    updateUserGreeting(); // Hiển thị lời chào ngay lập tức
+    updateSensors();
+    updateSystemStatus();
+
+    // Cập nhật realtime mỗi 3 giây
     setInterval(() => {
       updateSensors();
       updateSystemStatus();
     }, 3000);
 
-    // Load lần đầu khi mở trang
-    updateSensors();
-    updateSystemStatus();
-
-    function logout() {
-      localStorage.clear();
-      window.location.href = "login.html";
-    }
+    // Expose logout
+    window.logout = logout;
   </script>
 </body>
-
 </html>
