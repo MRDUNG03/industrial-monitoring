@@ -281,8 +281,7 @@
   if (!ts) return "Không xác định";
 
   try {
-    // Backend trả ISO string không có Z => coi như UTC
-    // Thêm Z để JS hiểu đây là UTC time
+    
     let dateStr = ts.trim();
     if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
       dateStr += 'Z';

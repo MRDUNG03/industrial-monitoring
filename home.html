@@ -469,10 +469,11 @@
     // Cập nhật realtime: cảm biến + trạng thái mỗi 3s, đồng hồ mỗi 1s
     setInterval(() => {
       updateSensors();
-      updateSystemStatus();
       updateLiveClock();
     }, 1000);
-
+    setInterval(() => {
+      updateSystemStatus();
+    }, 50000);
     // Expose logout function
     window.logout = logout;
   </script>

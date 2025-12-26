@@ -1,6 +1,6 @@
 // service.js
 // Backend cloud chính thức
-const API_BASE_URL = "https://motorai.cloud/api";
+const API_BASE_URL = "http://192.168.1.15:8000";
 
 // Hiển thị alert (dùng chung cho tất cả trang)
 export function showAlert(message, type = "danger") {
