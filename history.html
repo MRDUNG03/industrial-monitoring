@@ -276,17 +276,31 @@
   <script type="module">
     import { getAlertHistory, logout } from './service.js';
 
-    // HÀM FORMAT THỜI GIAN ĐƠN GIẢN VÌ BACKEND ĐÃ TRẢ ISO +07:00
+    // HÀM FORMAT THỜI GIAN - ĐÚNG GIỜ VIỆT NAM, GIỐNG HỆT APP FLUTTER
     function formatTimestamp(ts) {
       if (!ts) return "Không xác định";
 
-      const date = new Date(ts);
+      let date;
+
+      // Xử lý định dạng MySQL "YYYY-MM-DD HH:MM:SS" (thường là UTC)
+      if (typeof ts === 'string' && ts.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
+        const utcString = ts.trim().replace(' ', 'T') + 'Z'; // Gắn Z để JS hiểu là UTC
+        date = new Date(utcString);
+      } 
+      // Xử lý ISO có T (ví dụ backend đã format +07:00)
+      else if (typeof ts === 'string' && ts.includes('T')) {
+        date = new Date(ts);
+      } 
+      // Các trường hợp khác
+      else {
+        date = new Date(ts);
+      }
 
       if (isNaN(date.getTime())) {
         return "Không hợp lệ";
       }
 
-      // Định dạng giống hệt app Flutter: HH:mm:ss dd/MM/yyyy
+      // Định dạng giống hệt Flutter: HH:mm:ss dd/MM/yyyy
       const pad = (n) => n.toString().padStart(2, '0');
       return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
     }
