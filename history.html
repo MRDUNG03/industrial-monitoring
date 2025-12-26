@@ -274,54 +274,65 @@
 
   <!-- Script -->
   <script type="module">
-    import { getAlertHistory, logout } from './service.js';
+    // Import logout function (nếu có file service.js)
+    // import { getAlertHistory, logout } from './service.js';
 
-    // HÀM FORMAT THỜI GIAN - ĐÚNG GIỜ VIỆT NAM, GIỐNG HỆT APP FLUTTER
- function formatTimestamp(ts) {
-  if (!ts) return "Không xác định";
-
-  try {
-    
-    let dateStr = ts.trim();
-    if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
-      dateStr += 'Z';
-    }
-    
-    const date = new Date(dateStr);
-    
-    if (isNaN(date.getTime())) {
-      console.error('Invalid timestamp:', ts);
-      return "Thời gian không hợp lệ";
+    // Mock function để test (thay bằng API thật)
+    async function getAlertHistory() {
+      try {
+        const res = await fetch('http://192.168.1.15:8000/getAlert/');
+        if (!res.ok) throw new Error('API lỗi');
+        return await res.json();
+      } catch (err) {
+        console.error("Lỗi lấy dữ liệu alerts:", err);
+        throw err;
+      }
     }
 
-    // Chuyển sang giờ Việt Nam (UTC+7)
-    // JavaScript tự động convert theo timezone của máy
-    // Hoặc dùng toLocaleString với timezone
-    const options = {
-      timeZone: 'Asia/Ho_Chi_Minh',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour12: false
-    };
-    
-    const parts = new Intl.DateTimeFormat('vi-VN', options).formatToParts(date);
-    
-    const time = parts.filter(p => ['hour', 'minute', 'second'].includes(p.type))
-                      .map(p => p.value).join(':');
-    const dateVN = parts.filter(p => ['day', 'month', 'year'].includes(p.type))
-                        .map(p => p.value).join('/');
-    
-    return `${time} ${dateVN}`;
-    
-  } catch (error) {
-    console.error('Error formatting timestamp:', error);
-    return "Lỗi định dạng";
-  }
-}
+    // HÀM FORMAT THỜI GIAN - GIỜ VIỆT NAM
+    function formatTimestamp(ts) {
+      if (!ts) return "Không xác định";
+
+      try {
+        const date = new Date(ts);
+        
+        if (isNaN(date.getTime())) {
+          console.error('Invalid timestamp:', ts);
+          return "Thời gian không hợp lệ";
+        }
+
+        // Sử dụng timezone Việt Nam để format
+        const options = {
+          timeZone: 'Asia/Ho_Chi_Minh',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour12: false
+        };
+        
+        const formatter = new Intl.DateTimeFormat('vi-VN', options);
+        const parts = formatter.formatToParts(date);
+        
+        // Lấy từng phần
+        const getValue = (type) => parts.find(p => p.type === type)?.value || '00';
+        
+        const hours = getValue('hour');
+        const minutes = getValue('minute');
+        const seconds = getValue('second');
+        const day = getValue('day');
+        const month = getValue('month');
+        const year = getValue('year');
+        
+        return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+        
+      } catch (error) {
+        console.error('Error formatting timestamp:', error);
+        return "Lỗi định dạng";
+      }
+    }
 
     async function loadHistory() {
       const tbody = document.getElementById('historyTableBody');
@@ -362,16 +373,35 @@
       });
     }
 
-    // Đồng hồ thời gian thực
+    // Đồng hồ thời gian thực - Giờ Việt Nam
     function updateLiveClock() {
       const now = new Date();
-      const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-      const dateStr = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('vi-VN', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit', 
+        hour12: false,
+        timeZone: 'Asia/Ho_Chi_Minh'
+      });
+      const dateStr = now.toLocaleDateString('vi-VN', { 
+        weekday: 'long', 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        timeZone: 'Asia/Ho_Chi_Minh'
+      });
       const capitalizedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
 
       document.getElementById('clock-time').textContent = timeStr;
       document.getElementById('clock-date').textContent = capitalizedDate;
     }
+
+    // Logout function (demo)
+    window.logout = function() {
+      if (confirm('Bạn có chắc muốn đăng xuất?')) {
+        window.location.href = 'index.html';
+      }
+    };
 
     // Khởi động
     loadHistory();
@@ -380,8 +410,6 @@
     // Tự động cập nhật
     setInterval(loadHistory, 15000); // Mỗi 15 giây
     setInterval(updateLiveClock, 1000);
-
-    window.logout = logout;
   </script>
 
   <!-- Bootstrap Bundle -->
