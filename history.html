@@ -295,16 +295,22 @@
 
   let date;
 
-  // Trường hợp 1: Đã là ISO có timezone (backend đã format tốt)
-  if (typeof ts === 'string' && ts.includes('T') && (ts.includes('+') || ts.includes('Z'))) {
+  // Trường hợp 1: Nếu là chuỗi ISO có timezone rõ ràng (có T và + hoặc Z)
+  if (typeof ts === 'string' && ts.includes('T')) {
     date = new Date(ts);
   }
-  // Trường hợp 2: Định dạng MySQL "YYYY-MM-DD HH:MM:SS" → đây là UTC, cần cộng 7 giờ cho Việt Nam
+  // Trường hợp 2: Định dạng MySQL "YYYY-MM-DD HH:MM:SS"
   else if (typeof ts === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(ts.trim())) {
-    const utcString = ts.trim().replace(' ', 'T') + 'Z';  // Gắn Z để JS hiểu là UTC
-    date = new Date(utcString);
-    // Cộng thêm 7 giờ để ra giờ Việt Nam
-    date.setHours(date.getHours() + 7);
+    const parts = ts.trim().split(' ');
+    const datePart = parts[0];
+    const timePart = parts[1];
+
+    // Tạo Date object và giả định đây là giờ LOCAL (Việt Nam)
+    // Cách tốt nhất: dùng Date với năm tháng ngày giờ trực tiếp → JS sẽ hiểu là local time
+    const [year, month, day] = datePart.split('-');
+    const [hour, minute, second] = timePart.split(':');
+
+    date = new Date(year, month - 1, day, hour, minute, second);
   }
   // Trường hợp khác
   else {
@@ -315,6 +321,7 @@
     return "Không hợp lệ";
   }
 
+  // Định dạng đẹp tiếng Việt, giờ local
   return date.toLocaleString('vi-VN', {
     day: '2-digit',
     month: '2-digit',
