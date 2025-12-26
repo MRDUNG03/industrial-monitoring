@@ -295,32 +295,34 @@ function formatTimestamp(ts) {
 
   let date;
 
+  // Trường hợp 1: Định dạng phổ biến từ MySQL "YYYY-MM-DD HH:MM:SS"
   if (typeof ts === 'string' && ts.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-    const [datePart, timePart] = ts.trim().split(' ');
-    const [year, month, day] = datePart.split('-');
-    const [hour, minute, second] = timePart.split(':');
-
-    // Cách này tạo Date theo giờ địa phương → tự động đúng múi giờ Việt Nam
-    date = new Date(year, month - 1, day, hour, minute, second);
+    // Thêm 'Z' để JS hiểu đây là UTC, sau đó .toLocal() sẽ tự +7 giờ ở Việt Nam
+    const utcString = ts.trim().replace(' ', 'T') + 'Z';
+    date = new Date(utcString);
   }
+  // Trường hợp 2: Đã là định dạng ISO chuẩn (có T và +07:00 hoặc Z)
   else if (typeof ts === 'string' && ts.includes('T')) {
     date = new Date(ts);
   }
+  // Trường hợp khác
   else {
     date = new Date(ts);
   }
 
+  // Kiểm tra hợp lệ
   if (isNaN(date.getTime())) {
     return "Không hợp lệ";
   }
 
+  // Định dạng giống app Flutter: HH:mm:ss dd/MM/yyyy
   return date.toLocaleString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
     hour12: false
   });
 }
