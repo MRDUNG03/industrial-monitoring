@@ -299,27 +299,28 @@
 
     // Cập nhật dữ liệu biểu đồ
     async function updateCharts() {
-      const data = await fetchSensorData();
-      if (data.length === 0) return;
+  const d = await fetchSensorData();
+  if (!d) return;
 
-      const labels = data.map((_, i) => i + 1);
+  const label = new Date(d.timestamp).toLocaleTimeString("vi-VN");
 
-      axChart.data.labels = labels;
-      axChart.data.datasets[0].data = data.map(d => d.ax || 0);
-      axChart.update('quiet');
+  function push(chart, value) {
+    chart.data.labels.push(label);
+    chart.data.datasets[0].data.push(value ?? 0);
 
-      currentChart.data.labels = labels;
-      currentChart.data.datasets[0].data = data.map(d => d.current || 0);
-      currentChart.update('quiet');
-
-      voltageChart.data.labels = labels;
-      voltageChart.data.datasets[0].data = data.map(d => d.voltage || 0);
-      voltageChart.update('quiet');
-
-      tempChart.data.labels = labels;
-      tempChart.data.datasets[0].data = data.map(d => d.temp || 0);
-      tempChart.update('quiet');
+    if (chart.data.labels.length > MAX_POINTS) {
+      chart.data.labels.shift();
+      chart.data.datasets[0].data.shift();
     }
+    chart.update('quiet');
+  }
+
+  push(axChart, d.ax);
+  push(currentChart, d.current);
+  push(voltageChart, d.voltage);
+  push(tempChart, d.temp);
+}
+
 
     // Cập nhật đồng hồ thời gian thực (giống hệt trang chủ)
     function updateLiveClock() {
