@@ -78,7 +78,7 @@
       border-radius: 24px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.4);
       padding: 2rem;
-      height: 480px; /* Biểu đồ lớn hơn rõ rệt */
+      height: 480px;
       display: flex;
       flex-direction: column;
     }
@@ -102,6 +102,39 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.2);
     }
 
+    /* ĐỒNG HỒ THỜI GIAN THỰC - GÓC PHẢI TRÊN (copy từ trang chủ) */
+    #live-clock {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 12px 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: white;
+      z-index: 2000;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 260px;
+      justify-content: center;
+    }
+
+    #live-clock i {
+      font-size: 1.8rem;
+      color: #ffd43b;
+    }
+
+    .clock-date {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
     @media (max-width: 992px) {
       .sidebar { width: 80px; }
       .sidebar .logo h3, .sidebar .nav-link span { display: none; }
@@ -110,16 +143,38 @@
       .main-title { font-size: 2.6rem; }
       .chart-card { height: 380px; padding: 1.5rem; }
       .chart-card h5 { font-size: 1.3rem; }
+      #live-clock {
+        top: 10px;
+        right: 10px;
+        padding: 10px 16px;
+        font-size: 1.2rem;
+        min-width: 220px;
+      }
+      #live-clock i { font-size: 1.5rem; }
     }
 
     @media (max-width: 576px) {
       .main-title { font-size: 2.2rem; margin-bottom: 2rem; }
       .chart-card { height: 340px; padding: 1.2rem; }
       .chart-card h5 { font-size: 1.2rem; }
+      #live-clock {
+        font-size: 1.1rem;
+        padding: 8px 14px;
+        min-width: auto;
+      }
     }
   </style>
 </head>
 <body>
+
+  <!-- ĐỒNG HỒ THỜI GIAN THỰC -->
+  <div id="live-clock">
+    <i class="fas fa-clock"></i>
+    <div>
+      <div id="clock-time">--:--:--</div>
+      <div class="clock-date" id="clock-date">Đang tải...</div>
+    </div>
+  </div>
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -235,13 +290,13 @@
       });
     }
 
-    // Khởi tạo biểu đồ lớn
+    // Khởi tạo biểu đồ
     const axChart      = createBarChart('axChart', 'Trục X (m/s²)', '#10b981');
     const currentChart = createLineChart('currentChart', 'Dòng điện (A)', '#ef4444');
     const voltageChart = createLineChart('voltageChart', 'Điện áp (V)', '#3b82f6');
     const tempChart    = createLineChart('tempChart', 'Nhiệt độ (°C)', '#f97316');
 
-    // Cập nhật dữ liệu
+    // Cập nhật dữ liệu biểu đồ
     async function updateCharts() {
       const data = await fetchSensorData();
       if (data.length === 0) return;
@@ -265,9 +320,38 @@
       tempChart.update('quiet');
     }
 
-    // Cập nhật mỗi 3 giây
-    setInterval(updateCharts, 3000);
+    // Cập nhật đồng hồ thời gian thực (giống hệt trang chủ)
+    function updateLiveClock() {
+      const now = new Date();
+      
+      const timeOptions = { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit', 
+        hour12: false 
+      };
+      const dateOptions = { 
+        weekday: 'long', 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      };
+
+      const timeStr = now.toLocaleTimeString('vi-VN', timeOptions);
+      const dateStr = now.toLocaleDateString('vi-VN', dateOptions);
+      const capitalizedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+      document.getElementById('clock-time').textContent = timeStr;
+      document.getElementById('clock-date').textContent = capitalizedDate;
+    }
+
+    // Khởi động
     updateCharts();
+    updateLiveClock(); // Hiển thị lần đầu
+
+    // Cập nhật định kỳ
+    setInterval(updateCharts, 3000);   // Biểu đồ mỗi 3 giây
+    setInterval(updateLiveClock, 1000); // Đồng hồ mỗi 1 giây
 
     // Logout
     window.logout = logout;

@@ -103,6 +103,39 @@
 
     .btn-add { background: var(--success); border: none; padding: 0.8rem 1.5rem; font-size: 1.1rem; }
 
+    /* ĐỒNG HỒ THỜI GIAN THỰC - GÓC PHẢI TRÊN */
+    #live-clock {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 12px 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: white;
+      z-index: 2000;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 260px;
+      justify-content: center;
+    }
+
+    #live-clock i {
+      font-size: 1.8rem;
+      color: #ffd43b;
+    }
+
+    .clock-date {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
     @media (max-width: 992px) {
       .sidebar { width: 80px; }
       .sidebar .logo h3, .sidebar .nav-link span { display: none; }
@@ -110,6 +143,23 @@
       .main-content { margin-left: 80px; padding: 2rem 1.5rem; }
       .main-title { font-size: 2.6rem; }
       .device-card { padding: 2rem; }
+      #live-clock {
+        top: 10px;
+        right: 10px;
+        padding: 10px 16px;
+        font-size: 1.2rem;
+        min-width: 220px;
+      }
+      #live-clock i { font-size: 1.5rem; }
+    }
+
+    @media (max-width: 576px) {
+      .main-title { font-size: 2.2rem; margin-bottom: 2rem; }
+      #live-clock {
+        font-size: 1.1rem;
+        padding: 8px 14px;
+        min-width: auto;
+      }
     }
   </style>
 </head>
@@ -117,6 +167,15 @@
 
   <!-- Alert container (cho showAlert từ service.js) -->
   <div id="alert-container" class="container-fluid position-fixed top-0 start-50 translate-middle-x mt-4" style="z-index: 1100; max-width: 600px;"></div>
+
+  <!-- ĐỒNG HỒ THỜI GIAN THỰC -->
+  <div id="live-clock">
+    <i class="fas fa-clock"></i>
+    <div>
+      <div id="clock-time">--:--:--</div>
+      <div class="clock-date" id="clock-date">Đang tải...</div>
+    </div>
+  </div>
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -285,9 +344,38 @@
       }
     });
 
-    // Load lần đầu và tự động cập nhật
+    // Cập nhật đồng hồ thời gian thực
+    function updateLiveClock() {
+      const now = new Date();
+      
+      const timeOptions = { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit', 
+        hour12: false 
+      };
+      const dateOptions = { 
+        weekday: 'long', 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric' 
+      };
+
+      const timeStr = now.toLocaleTimeString('vi-VN', timeOptions);
+      const dateStr = now.toLocaleDateString('vi-VN', dateOptions);
+      const capitalizedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+      document.getElementById('clock-time').textContent = timeStr;
+      document.getElementById('clock-date').textContent = capitalizedDate;
+    }
+
+    // Khởi động
     loadDevices();
-    setInterval(loadDevices, 30000); // Cập nhật mỗi 30 giây
+    updateLiveClock(); // Hiển thị lần đầu
+
+    // Tự động cập nhật
+    setInterval(loadDevices, 30000);     // Danh sách thiết bị mỗi 30 giây
+    setInterval(updateLiveClock, 1000);   // Đồng hồ mỗi 1 giây
 
     // Logout
     window.logout = logout;
