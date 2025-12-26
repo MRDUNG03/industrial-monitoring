@@ -246,10 +246,11 @@
     // Lấy dữ liệu từ cloud API
     async function fetchSensorData() {
       try {
-        const res = await fetch('https://motorai.cloud/api/getdata/');
+        <!-- <!-- const res = await fetch('https://motorai.cloud/api/getdata/'); -->
+        const res = await fetch('http://192.168.1.15:8000/getdata/?limit=1');
         if (!res.ok) throw new Error('API lỗi');
         const data = await res.json();
-        return data.slice(-512); // 512 mẫu mới nhất
+        return data.length > 0 ? data[0] : null;
       } catch (err) {
         console.error("Lỗi lấy dữ liệu:", err);
         return [];
