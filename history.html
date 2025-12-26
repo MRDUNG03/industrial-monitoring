@@ -289,44 +289,34 @@
  <script type="module">
   import { getAlertHistory, logout } from './service.js';
 
-  // HÀM SỬA MỚI: Xử lý trường hợp backend KHÔNG TRẢ VỀ timestamp
-function formatTimestamp(ts) {
+ function formatTimestamp(ts) {
   if (!ts) return "Không xác định";
 
   let date;
 
-  // Trường hợp 1: Định dạng phổ biến từ MySQL "YYYY-MM-DD HH:MM:SS"
   if (typeof ts === 'string' && ts.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-    // Thêm 'Z' để JS hiểu đây là UTC, sau đó .toLocal() sẽ tự +7 giờ ở Việt Nam
     const utcString = ts.trim().replace(' ', 'T') + 'Z';
     date = new Date(utcString);
-  }
-  // Trường hợp 2: Đã là định dạng ISO chuẩn (có T và +07:00 hoặc Z)
-  else if (typeof ts === 'string' && ts.includes('T')) {
-    date = new Date(ts);
-  }
-  // Trường hợp khác
-  else {
+  } else {
     date = new Date(ts);
   }
 
-  // Kiểm tra hợp lệ
   if (isNaN(date.getTime())) {
     return "Không hợp lệ";
   }
 
-  // Định dạng giống app Flutter: HH:mm:ss dd/MM/yyyy
-  return date.toLocaleString('vi-VN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour12: false
-  });
-}
+  // Định dạng thủ công giống hệt Flutter
+  const pad = (n) => n.toString().padStart(2, '0');
 
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+  const day = pad(date.getDate());
+  const month = pad(date.getMonth() + 1);
+  const year = date.getFullYear();
+
+  return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+}
   async function loadHistory() {
     const tbody = document.getElementById('historyTableBody');
     let alerts;
