@@ -276,31 +276,17 @@
   <script type="module">
     import { getAlertHistory, logout } from './service.js';
 
-    // HÀM FORMAT THỜI GIAN GIỐNG HỆT APP FLUTTER (HH:mm:ss dd/MM/yyyy) - ĐÚNG GIỜ VIỆT NAM
+    // HÀM FORMAT THỜI GIAN ĐƠN GIẢN VÌ BACKEND ĐÃ TRẢ ISO +07:00
     function formatTimestamp(ts) {
       if (!ts) return "Không xác định";
 
-      let date;
-
-      // Xử lý định dạng MySQL phổ biến "YYYY-MM-DD HH:MM:SS" (thường là UTC)
-      if (typeof ts === 'string' && ts.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-        const utcString = ts.trim().replace(' ', 'T') + 'Z';
-        date = new Date(utcString);
-      } 
-      // Xử lý ISO có T
-      else if (typeof ts === 'string' && ts.includes('T')) {
-        date = new Date(ts);
-      } 
-      // Các trường hợp khác
-      else {
-        date = new Date(ts);
-      }
+      const date = new Date(ts);
 
       if (isNaN(date.getTime())) {
         return "Không hợp lệ";
       }
 
-      // Định dạng thủ công giống hệt Flutter: HH:mm:ss dd/MM/yyyy
+      // Định dạng giống hệt app Flutter: HH:mm:ss dd/MM/yyyy
       const pad = (n) => n.toString().padStart(2, '0');
       return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
     }
@@ -360,7 +346,7 @@
     updateLiveClock();
 
     // Tự động cập nhật
-    setInterval(loadHistory, 15000); // 15 giây
+    setInterval(loadHistory, 15000); // Mỗi 15 giây
     setInterval(updateLiveClock, 1000);
 
     window.logout = logout;
