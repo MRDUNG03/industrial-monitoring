@@ -154,6 +154,26 @@ export async function insertDevice(deviceData) {
     return { success: false, message: err.message || "Không thể kết nối server" };
   }
 }
+// XÓA THIẾT BỊ THEO ID (mới thêm)
+export async function deleteDevice(deviceId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/deleteDevice/${deviceId}`, {
+      method: "DELETE",
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Backend trả về message khi không tìm thấy hoặc lỗi
+      throw new Error(data.message || "Không thể xóa thiết bị");
+    }
+
+    return { success: true, message: data.message || "Đã xóa thiết bị thành công!" };
+  } catch (err) {
+    console.error("Lỗi xóa thiết bị:", err);
+    return { success: false, message: err.message || "Không thể kết nối server" };
+  }
+}
 // Đăng xuất (xóa dữ liệu và chuyển về trang login)
 export function logout() {
   localStorage.clear();

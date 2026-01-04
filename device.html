@@ -133,6 +133,29 @@
     .status-online { background: #eefdf5; color: #10b981; border: 1px solid #10b981; }
     .status-offline { background: #fff5f5; color: #ef4444; border: 1px solid #ef4444; }
 
+    /* Nút xóa */
+    .btn-delete {
+      background: #fef2f2;
+      color: #dc2626;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+    .btn-delete:hover {
+      background: #fecaca;
+      transform: scale(1.1);
+    }
+
+    /* Alert container */
+    #alert-container {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      z-index: 3000;
+      width: 380px;
+    }
+
     /* Modal */
     .modal-content { border-radius: 25px; border: none; }
     .modal-header { background: #f8f9fa; border-bottom: 1px solid #eee; border-radius: 25px 25px 0 0; }
@@ -145,6 +168,9 @@
   </style>
 </head>
 <body>
+
+  <!-- Alert container -->
+  <div id="alert-container"></div>
 
   <div id="live-clock">
     <div id="clock-time">--:--:--</div>
@@ -184,19 +210,22 @@
         <table class="table device-table">
           <thead>
             <tr>
-              <th width="10%">STT</th>
-              <th width="40%">Tên thiết bị</th>
-              <th width="20%">Trạng thái</th>
-              <th width="30%">Cập nhật cuối</th>
+              <th width="8%">STT</th>
+              <th width="30%">Tên thiết bị</th>
+              <th width="18%">Trạng thái</th>
+              <th width="24%">Cập nhật cuối</th>
+              <th width="20%">Hành động</th>
             </tr>
           </thead>
           <tbody id="deviceTableBody">
-            </tbody>
+            <!-- Dữ liệu sẽ được load bằng JS -->
+          </tbody>
         </table>
       </div>
     </div>
   </div>
 
+  <!-- Modal thêm thiết bị -->
   <div class="modal fade" id="addDeviceModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content text-dark">
@@ -225,21 +254,23 @@
   </div>
 
   <script type="module">
-    import { getDevices, insertDevice, logout } from './service.js';
+    import { getDevices, insertDevice, deleteDevice, showAlert, logout } from './service.js';
 
     async function loadDevices() {
       const tbody = document.getElementById('deviceTableBody');
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin"></i> Đang tải...</td></tr>';
+
       try {
         const devices = await getDevices();
-        tbody.innerHTML = '';
 
         if (!devices || devices.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-muted">Không có thiết bị.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted">Không có thiết bị nào.</td></tr>`;
           return;
         }
 
+        tbody.innerHTML = '';
         devices.forEach((dev, index) => {
-          const isOnline = dev.status === "online";
+          const isOnline = dev.status === "online" || dev.status === "Online";
           const row = document.createElement('tr');
           row.innerHTML = `
             <td><strong>${index + 1}</strong></td>
@@ -250,37 +281,74 @@
               </span>
             </td>
             <td class="text-muted small">${dev.last_update ? new Date(dev.last_update).toLocaleString('vi-VN') : 'Chưa có dữ liệu'}</td>
+            <td>
+              <button class="btn btn-delete btn-sm" data-id="${dev.id}" title="Xóa thiết bị">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
           `;
           tbody.appendChild(row);
         });
-      } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-danger">Lỗi kết nối.</td></tr>`;
+
+        // Gắn sự kiện xóa cho các nút
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const deviceId = parseInt(e.currentTarget.dataset.id);
+            const deviceName = e.currentTarget.closest('tr').querySelector('td:nth-child(2)').textContent.trim();
+
+            if (confirm(`Bạn có chắc muốn xóa thiết bị "${deviceName}" (ID: ${deviceId}) không?\nHành động này không thể hoàn tác!`)) {
+              const result = await deleteDevice(deviceId);
+              showAlert(result.message, result.success ? "success" : "danger");
+              if (result.success) {
+                loadDevices(); // Reload danh sách
+              }
+            }
+          });
+        });
+
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-danger">Lỗi kết nối server.</td></tr>`;
       }
     }
 
+    // Thêm thiết bị mới
     document.getElementById('saveDeviceBtn').addEventListener('click', async () => {
       const name = document.getElementById('deviceName').value.trim();
       const deviceId = document.getElementById('deviceId').value.trim();
-      if (name && deviceId) {
-        const result = await insertDevice({ name, device_id: deviceId });
-        if (result.success) {
-          bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
-          loadDevices();
-        }
+
+      if (!name || !deviceId) {
+        showAlert("Vui lòng nhập đầy đủ tên và Device ID!", "danger");
+        return;
+      }
+
+      const result = await insertDevice({ name, device_id: deviceId, description: null });
+
+      showAlert(result.message, result.success ? "success" : "danger");
+
+      if (result.success) {
+        document.getElementById('deviceName').value = '';
+        document.getElementById('deviceId').value = '';
+        bootstrap.Modal.getInstance(document.getElementById('addDeviceModal')).hide();
+        loadDevices();
       }
     });
 
-    // Khởi tạo thông tin người dùng và dữ liệu
+    // Khởi tạo
     document.getElementById("username-display").innerHTML = `Xin chào, <strong>${localStorage.getItem("username") || "User"}</strong>`;
     loadDevices();
-    setInterval(loadDevices, 15000);
+    setInterval(loadDevices, 15000); // Tự động refresh mỗi 15 giây
 
-    // Đồng hồ
-    setInterval(() => {
+    // Đồng hồ realtime
+    function updateClock() {
       const now = new Date();
       document.getElementById('clock-time').textContent = now.toLocaleTimeString('vi-VN');
-      document.getElementById('clock-date').textContent = now.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' });
-    }, 1000);
+      document.getElementById('clock-date').textContent = now.toLocaleDateString('vi-VN', {
+        weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
 
     window.logout = logout;
   </script>
